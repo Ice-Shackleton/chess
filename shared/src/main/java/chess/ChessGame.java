@@ -10,9 +10,18 @@ import java.util.Collection;
  */
 public class ChessGame {
 
+    /**
+     * This variable {@link BoardState} handles deferred data management
+     * of the board state from the interface.
+     */
+    private BoardState board;
+
+
+
     public ChessGame() {
 
     }
+
 
     /**
      * @return Which team's turn it is
@@ -95,8 +104,9 @@ public class ChessGame {
      *
      * @param board the new board to use
      */
-    public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+    public void setBoard(BoardState board) {
+        this.board = board;
+
     }
 
     /**
