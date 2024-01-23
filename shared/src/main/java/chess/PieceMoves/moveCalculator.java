@@ -1,4 +1,9 @@
 package chess.PieceMoves;
 
-public class moveCalculator {
+public abstract class moveCalculator {
+
+    public abstract boolean isPiece();
+
+
+
 }

@@ -8,7 +8,18 @@ package chess;
  */
 public class ChessPosition {
 
+    /**
+     * This is the row variable of a chess position, where 0 represents the top-most row.
+     */
+    private int row;
+
+    /**
+     * This is the column variable of a chess position, where 0 represents the left-most row.
+     */
+    private int col;
     public ChessPosition(int row, int col) {
+        this.row = row;
+        this.col = col;
     }
 
     /**
@@ -16,7 +27,7 @@ public class ChessPosition {
      * 1 codes for the bottom row
      */
     public int getRow() {
-        throw new RuntimeException("Not implemented");
+        return this.row;
     }
 
     /**
@@ -24,6 +35,6 @@ public class ChessPosition {
      * 1 codes for the left row
      */
     public int getColumn() {
-        throw new RuntimeException("Not implemented");
+        return this.col;
     }
 }
