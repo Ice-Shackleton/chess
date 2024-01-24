@@ -1,6 +1,9 @@
 package chess;
 
 import java.util.Collection;
+import java.util.Objects;
+import chess.PieceMoves.*;
+
 
 /**
  * Represents a single chess piece
@@ -52,6 +55,28 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        return moveCalculator.allTheMoves(board, myPosition);
+    }
+
+    /**
+     * This is a simple method to check that a passed-in piece is not an empty space.
+     * @param piece A {@link ChessPiece} or square from the board.
+     * @return True if {@param piece} is a piece, false if empty.
+     */
+    public boolean isPiece(ChessPiece piece){
+        return piece != null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || this.getClass() != o.getClass()) return false;
+        ChessPiece that = (ChessPiece) o;
+        return this.color == that.color && this.type == that.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.color, this.type);
     }
 }

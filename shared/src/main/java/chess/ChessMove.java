@@ -1,5 +1,7 @@
 package chess;
 
+import java.util.Objects;
+
 /**
  * Represents moving a chess piece on a chessboard
  * <p>
@@ -12,16 +14,6 @@ public class ChessMove {
     private ChessPosition end;
     private ChessPiece.PieceType promotion;
 
-    /**
-     * This is the default constructor for a chess move, where promotions do not need to be
-     * evaluated.
-     * @param startPosition   Start square of the move.
-     * @param endPosition     End square of the move.
-     */
-    public ChessMove(ChessPosition startPosition, ChessPosition endPosition) {
-        this.start = startPosition;
-        this.end = endPosition;
-    }
 
     /**
      * Since only pawns can be promoted, and then only on the top/bottom row of the board,
@@ -59,5 +51,19 @@ public class ChessMove {
      */
     public ChessPiece.PieceType getPromotionPiece() {
         return this.promotion;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessMove chessMove = (ChessMove) o;
+        return Objects.equals(this.start, chessMove.start) && Objects.equals(this.end, chessMove.end)
+                && this.promotion == chessMove.promotion;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.start, this.end, this.promotion);
     }
 }
