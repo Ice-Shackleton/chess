@@ -29,6 +29,10 @@ public class moveCalculator {
                     moves.addAll(KingMove.kingMove(board, myPosition));
                     break;
                 }
+                case KNIGHT: {
+                    moves.addAll(KnightMove.knightMove(board, myPosition));
+                    break;
+                }
             }
         }
         return moves;
