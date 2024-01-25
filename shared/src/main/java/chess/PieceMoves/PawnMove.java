@@ -20,7 +20,7 @@ public class PawnMove {
 
         switch (color) {
             case WHITE: {
-                if (start.getRow() == 1) {
+                if (start.getRow() == 2) {
                     ChessPosition temp = new ChessPosition(start.getRow() + 1, start.getColumn());
                     ChessPosition leap = new ChessPosition(start.getRow() + 2, start.getColumn());
 
@@ -35,8 +35,10 @@ public class PawnMove {
                         start.getColumn() + 1) && moveCalculator.isEnemyPiece(start, board, diag1)) {
 
                     if (diag1.getRow() == 8) {
-                        ChessMove z = new ChessMove(start, diag1, ChessPiece.PieceType.QUEEN);
-                        pMoves.add(z);
+                        pMoves.add(new ChessMove(start, diag1, ChessPiece.PieceType.QUEEN));
+                        pMoves.add(new ChessMove(start, diag1, ChessPiece.PieceType.ROOK));
+                        pMoves.add(new ChessMove(start, diag1, ChessPiece.PieceType.BISHOP));
+                        pMoves.add(new ChessMove(start, diag1, ChessPiece.PieceType.KNIGHT));
                     } else {
                         ChessMove z = new ChessMove(start, diag1, null);
                         pMoves.add(z);
@@ -47,8 +49,10 @@ public class PawnMove {
                 if (board.getPiece(diag2) != null && moveCalculator.inBounds(start.getRow() + 1,
                         start.getColumn() - 1) && moveCalculator.isEnemyPiece(start, board, diag2)) {
                     if (diag2.getRow() == 8) {
-                        ChessMove v = new ChessMove(start, diag2, ChessPiece.PieceType.QUEEN);
-                        pMoves.add(v);
+                        pMoves.add(new ChessMove(start, diag2, ChessPiece.PieceType.QUEEN));
+                        pMoves.add(new ChessMove(start, diag2, ChessPiece.PieceType.BISHOP));
+                        pMoves.add(new ChessMove(start, diag2, ChessPiece.PieceType.ROOK));
+                        pMoves.add(new ChessMove(start, diag2, ChessPiece.PieceType.KNIGHT));
                     } else {
                         ChessMove v = new ChessMove(start, diag2, null);
                         pMoves.add(v);
@@ -59,9 +63,11 @@ public class PawnMove {
                 ChessPosition forward = new ChessPosition(start.getRow() + 1, start.getColumn());
                 if (board.getPiece(forward) == null && moveCalculator.inBounds(start.getRow() + 1,
                         start.getColumn())) {
-                    if (diag2.getRow() == 8) {
-                        ChessMove n = new ChessMove(start, forward, ChessPiece.PieceType.QUEEN);
-                        pMoves.add(n);
+                    if (forward.getRow() == 8) {
+                        pMoves.add(new ChessMove(start, forward, ChessPiece.PieceType.QUEEN));
+                        pMoves.add(new ChessMove(start, forward, ChessPiece.PieceType.ROOK));
+                        pMoves.add(new ChessMove(start, forward, ChessPiece.PieceType.BISHOP));
+                        pMoves.add(new ChessMove(start, forward, ChessPiece.PieceType.KNIGHT));
                     } else {
                         ChessMove n = new ChessMove(start, forward, null);
                         pMoves.add(n);
@@ -87,8 +93,10 @@ public class PawnMove {
                         start.getColumn() + 1) && moveCalculator.isEnemyPiece(start, board, diag1)) {
 
                     if (diag1.getRow() == 1) {
-                        ChessMove z = new ChessMove(start, diag1, ChessPiece.PieceType.QUEEN);
-                        pMoves.add(z);
+                        pMoves.add(new ChessMove(start, diag1, ChessPiece.PieceType.QUEEN));
+                        pMoves.add(new ChessMove(start, diag1, ChessPiece.PieceType.ROOK));
+                        pMoves.add(new ChessMove(start, diag1, ChessPiece.PieceType.BISHOP));
+                        pMoves.add(new ChessMove(start, diag1, ChessPiece.PieceType.KNIGHT));
                     } else {
                         ChessMove z = new ChessMove(start, diag1, null);
                         pMoves.add(z);
@@ -100,8 +108,10 @@ public class PawnMove {
                 if (board.getPiece(diag2) != null && moveCalculator.inBounds(start.getRow() - 1,
                         start.getColumn() - 1) && moveCalculator.isEnemyPiece(start, board, diag2)) {
                     if (diag2.getRow() == 1) {
-                        ChessMove v = new ChessMove(start, diag2, ChessPiece.PieceType.QUEEN);
-                        pMoves.add(v);
+                        pMoves.add(new ChessMove(start, diag2, ChessPiece.PieceType.QUEEN));
+                        pMoves.add(new ChessMove(start, diag2, ChessPiece.PieceType.BISHOP));
+                        pMoves.add(new ChessMove(start, diag2, ChessPiece.PieceType.ROOK));
+                        pMoves.add(new ChessMove(start, diag2, ChessPiece.PieceType.KNIGHT));
                     } else {
                         ChessMove v = new ChessMove(start, diag2, null);
                         pMoves.add(v);
@@ -111,9 +121,11 @@ public class PawnMove {
                 ChessPosition forward = new ChessPosition(start.getRow() - 1, start.getColumn());
                 if (board.getPiece(forward) == null && moveCalculator.inBounds(start.getRow() - 1,
                         start.getColumn())) {
-                    if (diag2.getRow() == 8) {
-                        ChessMove n = new ChessMove(start, forward, ChessPiece.PieceType.QUEEN);
-                        pMoves.add(n);
+                    if (forward.getRow() == 1) {
+                        pMoves.add(new ChessMove(start, forward, ChessPiece.PieceType.QUEEN));
+                        pMoves.add(new ChessMove(start, forward, ChessPiece.PieceType.ROOK));
+                        pMoves.add(new ChessMove(start, forward, ChessPiece.PieceType.BISHOP));
+                        pMoves.add(new ChessMove(start, forward, ChessPiece.PieceType.KNIGHT));
                     } else {
                         ChessMove n = new ChessMove(start, forward, null);
                         pMoves.add(n);
