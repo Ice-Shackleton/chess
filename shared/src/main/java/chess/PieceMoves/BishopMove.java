@@ -40,6 +40,10 @@ public class BishopMove {
                 nextRow += dRows[i];
                 nextCol += dCols[i];
             }
+            if (moveCalculator.isEnemyPiece(start, board, end)){
+                ChessMove x = new ChessMove(start, end, null);
+                bMoves.add(x);
+            }
         }
         return bMoves;
     }

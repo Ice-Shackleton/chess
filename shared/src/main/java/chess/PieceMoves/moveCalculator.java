@@ -1,9 +1,6 @@
 package chess.PieceMoves;
 
-import chess.ChessBoard;
-import chess.ChessMove;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -26,6 +23,11 @@ public class moveCalculator {
             switch (test){
                 case BISHOP: {
                     moves.addAll(BishopMove.bishopMove(board, myPosition));
+                    break;
+                }
+                case KING: {
+                    moves.addAll(KingMove.kingMove(board, myPosition));
+                    break;
                 }
             }
         }
@@ -43,6 +45,22 @@ public class moveCalculator {
         return row >= 1 && row < 9 && col >= 1 && col < 9;
     }
 
+
+    public static boolean isEnemyPiece (ChessPosition thisPosition, ChessBoard board,
+                                        ChessPosition otherPosition) {
+        ChessPiece thisPiece = board.getPiece(thisPosition);
+        ChessPiece otherPiece = board.getPiece(otherPosition);
+        if (otherPiece == null){
+            return false;
+        }
+        ChessGame.TeamColor thisTeam = thisPiece.getTeamColor();
+        ChessGame.TeamColor otherTeam = otherPiece.getTeamColor();
+
+        if ((thisTeam != otherTeam)){
+            return true;
+        }
+        return false;
+    }
 
 
 }
