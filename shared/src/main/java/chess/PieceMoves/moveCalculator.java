@@ -41,6 +41,11 @@ public class moveCalculator {
                     moves.addAll(QueenMove.queenMove(board, myPosition));
                     break;
                 }
+                case PAWN: {
+                    ChessGame.TeamColor color = board.getPiece(myPosition).getTeamColor();
+                    moves.addAll(PawnMove.pawnMoves(board, myPosition, color));
+                    break;
+                }
             }
         }
         return moves;
