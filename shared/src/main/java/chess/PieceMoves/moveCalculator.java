@@ -37,6 +37,10 @@ public class moveCalculator {
                     moves.addAll(RookMove.rookMove(board, myPosition));
                     break;
                 }
+                case QUEEN: {
+                    moves.addAll(QueenMove.queenMove(board, myPosition));
+                    break;
+                }
             }
         }
         return moves;
