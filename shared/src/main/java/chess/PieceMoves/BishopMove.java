@@ -19,6 +19,7 @@ public class BishopMove {
      * This function finds all the valid moves a bishop can make from its current position on
      * the board. A valid move is one that ends on an empty space within the bounds of the
      * {@link ChessBoard}. Every time this method is called, it resets the hash set.
+     *
      * @param board The current board state as a {@link ChessBoard} object.
      * @param space The piece's current position on the board as a {@link ChessPosition} object.
      * @return A hash set containing all valid moves a bishop can make at its current position.
@@ -34,11 +35,11 @@ public class BishopMove {
             ChessPosition end = new ChessPosition(nextRow, nextCol);
 
             while (board.getPiece(end) == null && moveCalculator.inBounds(nextRow, nextCol)) {
-                end = new ChessPosition(nextRow, nextCol);
                 ChessMove x = new ChessMove(start, end, null);
                 bMoves.add(x);
                 nextRow += dRows[i];
                 nextCol += dCols[i];
+                end = new ChessPosition(nextRow, nextCol);
             }
             if (moveCalculator.isEnemyPiece(start, board, end)){
                 ChessMove x = new ChessMove(start, end, null);

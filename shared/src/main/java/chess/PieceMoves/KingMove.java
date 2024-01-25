@@ -8,8 +8,21 @@ import java.util.Collection;
 import java.util.HashSet;
 public class KingMove {
 
+    /**
+     * This variable stores all the moves a single King can make from its current
+     * position on the board.
+     */
     private static HashSet<ChessMove> kMoves = new HashSet<ChessMove>();
 
+    /**
+     * This function finds all the valid moves the king can make from its current position on
+     * the board. A valid move is one that ends on an empty space within the bounds of the
+     * {@link ChessBoard}. Every time this method is called, it resets the hash set.
+     *
+     * @param board The current board state as a {@link ChessBoard} object.
+     * @param space The piece's current position on the board as a {@link ChessPosition} object.
+     * @return A hash set containing all valid moves a king can make at its current position.
+     */
     public static Collection<ChessMove> kingMove (ChessBoard board, ChessPosition space) {
         kMoves = new HashSet<ChessMove>();
         ChessPosition start = new ChessPosition(space.getRow(), space.getColumn());
