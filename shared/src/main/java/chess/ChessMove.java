@@ -9,18 +9,17 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessMove {
-
     private ChessPosition start;
     private ChessPosition end;
     private ChessPiece.PieceType promotion;
 
-
     /**
-     * Since only pawns can be promoted, and then only on the top/bottom row of the board,
-     * this overloaded constructor handles pawn moves that end in such spaces.
-     * @param startPosition   Start square of the move.
-     * @param endPosition     End square of the move.
-     * @param promotionPiece  The desired piece a pawn should be upgraded to.
+     * This constructs a {@link ChessMove} object.
+     * @param startPosition A piece's current position on the {@link ChessBoard}.
+     * @param endPosition A valid end position for the piece on the {@link ChessBoard}.
+     * @param promotionPiece This applies only to pawns moving onto either board edge. If
+     *                       a promotion is possible it will specify which {@link ChessPiece}
+     *                       the pawn will be promoted to. Otherwise, it will be null.
      */
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
@@ -53,12 +52,14 @@ public class ChessMove {
         return this.promotion;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessMove chessMove = (ChessMove) o;
-        return Objects.equals(this.start, chessMove.start) && Objects.equals(this.end, chessMove.end)
+        return Objects.deepEquals(this.start, chessMove.start)
+                && Objects.equals(this.end, chessMove.end)
                 && this.promotion == chessMove.promotion;
     }
 

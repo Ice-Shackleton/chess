@@ -11,17 +11,15 @@ import java.util.Objects;
 public class ChessPosition {
 
     /**
-     * This is the row variable of a chess position, where 0 represents the top-most row.
+     * Please note that the rows and columns of a Chess Position are on a 1 index, rather than 0.
      */
-    private int row;
 
-    /**
-     * This is the column variable of a chess position, where 0 represents the left-most row.
-     */
-    private int col;
+    private int pRow;
+    private int pCol;
+
     public ChessPosition(int row, int col) {
-        this.row = row;
-        this.col = col;
+        this.pRow = row;
+        this.pCol = col;
     }
 
     /**
@@ -29,15 +27,15 @@ public class ChessPosition {
      * 1 codes for the bottom row
      */
     public int getRow() {
-        return this.row;
+        return this.pRow;
     }
 
     /**
      * @return which column this position is in
-     * 1 codes for the left row
+     * 1 codes for the left column
      */
     public int getColumn() {
-        return this.col;
+        return this.pCol;
     }
 
     @Override
@@ -45,11 +43,11 @@ public class ChessPosition {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessPosition that = (ChessPosition) o;
-        return this.row == that.row && this.col == that.col;
+        return this.pRow == that.pRow && this.pCol == that.pCol;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.row, this.col);
+        return Objects.hash(this.pRow, this.pCol);
     }
 }

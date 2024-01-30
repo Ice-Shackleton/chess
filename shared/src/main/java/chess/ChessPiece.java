@@ -1,9 +1,9 @@
 package chess;
 
+import chess.potentialMoves.allTheMoves;
+
 import java.util.Collection;
 import java.util.Objects;
-import chess.PieceMoves.*;
-
 
 /**
  * Represents a single chess piece
@@ -14,8 +14,13 @@ import chess.PieceMoves.*;
 public class ChessPiece {
 
     private ChessGame.TeamColor color;
-
     private ChessPiece.PieceType type;
+
+    /**
+     * This creates a {@link ChessPiece} object.
+     * @param pieceColor A piece's team color.
+     * @param type The type of piece.
+     */
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.color = pieceColor;
         this.type = type;
@@ -47,6 +52,8 @@ public class ChessPiece {
         return this.type;
     }
 
+
+
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
@@ -55,28 +62,19 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return moveCalculator.allTheMoves(board, myPosition);
-    }
-
-    /**
-     * This is a simple method to check that a passed-in piece is not an empty space.
-     * @param piece A {@link ChessPiece} or square from the board.
-     * @return True if {@param piece} is a piece, false if empty.
-     */
-    public boolean isPiece(ChessPiece piece){
-        return piece != null;
+        return allTheMoves.moveCalculator(board, myPosition);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || this.getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         ChessPiece that = (ChessPiece) o;
         return this.color == that.color && this.type == that.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.color, this.type);
+        return Objects.hash(color, type);
     }
 }
