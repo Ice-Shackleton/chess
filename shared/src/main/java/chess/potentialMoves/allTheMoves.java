@@ -47,7 +47,10 @@ public class allTheMoves {
             }
 
         }
-        return moveSet;
+        if(moveSet.size() > 0){
+            return moveSet;
+        }
+        return null;
     }
 
 
