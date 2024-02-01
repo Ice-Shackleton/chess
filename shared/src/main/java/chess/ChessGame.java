@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -13,10 +14,26 @@ public class ChessGame {
     private TeamColor currentTurn;
     private ChessBoard boardState;
 
+    /**
+     * These variables are to make finding the king's position on the chess board easy.
+     */
+    private ChessPosition blackKing;
+    private ChessPosition whiteKing;
+
+    /**
+     * These variables will allow easy tracking of whether castling is a valid move.
+     */
+    private boolean blackCastle;
+    private boolean whiteCastle;
+
     public ChessGame() {
         this.currentTurn = TeamColor.WHITE;
         this.boardState = new ChessBoard();
         this.boardState.resetBoard();
+        this.whiteKing = new ChessPosition(1, 5);
+        this.blackKing = new ChessPosition(8, 5);
+        this.blackCastle = true;
+        this.whiteCastle = true;
     }
 
     /**
@@ -70,6 +87,28 @@ public class ChessGame {
             this.boardState.removePiece(move.getStartPosition());
             this.boardState.removePiece(move.getEndPosition());
             this.boardState.addPiece(move.getEndPosition(), example);
+
+            //This allows for the easy tracking of the kings' position.
+            if(boardState.getPiece(move.getEndPosition()).getPieceType() == ChessPiece.PieceType.KING){
+                if (example.getTeamColor() == TeamColor.BLACK){
+                    this.blackKing = move.getEndPosition();
+                    blackCastle = false;
+                }
+                if(example.getTeamColor() == TeamColor.WHITE){
+                    this.whiteKing = move.getEndPosition();
+                    this.whiteCastle = true;
+                }
+            }
+
+            //Finally, we track if castling is still okay.
+            if(boardState.getPiece(move.getEndPosition()).getPieceType() == ChessPiece.PieceType.ROOK){
+                if (example.getTeamColor() == TeamColor.BLACK){
+                    blackCastle = false;
+                }
+                if(example.getTeamColor() == TeamColor.WHITE){
+                    this.whiteCastle = true;
+                }
+            }
         }
     }
 
@@ -131,9 +170,103 @@ public class ChessGame {
      * for the purposes of checking if the move leaves a piece in check.
      *
      * @param move A potential move
-     * @return
+     * @return a {@link ChessBoard} with the hypothetical move performed.
      */
-    public ChessBoard hypotheticalMove(ChessMove move){
-        ChessBoard that = new ChessBoard();
+    private ChessBoard hypotheticalMove(ChessMove move){
+        ChessBoard that = this.boardState.deepCopy();
+        Collection<ChessMove> temp = this.validMoves(move.getStartPosition());
+        ChessPiece example = that.getPiece(move.getStartPosition());
+        ChessGame.TeamColor tempColor = example.getTeamColor();
+        if (temp.contains(move) && (tempColor == this.currentTurn)) {
+            that.removePiece(move.getStartPosition());
+            that.removePiece(move.getEndPosition());
+            that.addPiece(move.getEndPosition(), example);
+        }
+        return that;
     }
+
+
+    private boolean kingThreatened(ChessBoard board, ChessPosition king, TeamColor color){
+        int row = king.getRow();
+        int col = king.getColumn();
+        //First, we check the diagonals.
+        int[] bRows = {-1, 1, -1, 1};
+        int[] bCol =  {-1,-1,  1, 1};
+        for (int i=0; i < 4; i++){
+            ChessPosition end = new ChessPosition(row + bRows[i],
+                    col + bCol[i]);
+            while (board.getPiece(end) == null && board.isInBounds(end)){
+                end = new ChessPosition(end.getRow()+bRows[i], end.getColumn()+bCol[i]);
+            }
+
+            if ((board.getPiece(end) != null) && board.isEnemyPiece(king, end){
+                if ((board.getPiece(end).getPieceType() == (ChessPiece.PieceType.BISHOP))
+                        || (board.getPiece(end).getPieceType() == (ChessPiece.PieceType.QUEEN))){
+                    return true;
+                }
+            }
+
+        }
+
+        //Then, we check the horizontals.
+        bRows = new int[]{-1, 1, 0, 0};
+        bCol = new int[]{0, 0, 1, -1};
+        for (int i=0; i < 4; i++){
+            ChessPosition end = new ChessPosition(row + bRows[i], col + bCol[i]);
+            while (board.getPiece(end) == null && board.isInBounds(end)){
+                end = new ChessPosition(end.getRow()+bRows[i], end.getColumn()+bCol[i]);
+            }
+
+            if ((board.getPiece(end).getPieceType() == (ChessPiece.PieceType.ROOK))
+                    || (board.getPiece(end).getPieceType() == (ChessPiece.PieceType.QUEEN))){
+                return true;
+            }
+        }
+
+        //now, we test for the knights in range.
+        bRows = new int[]{2, 2, -2,-2,-1, 1, -1, 1};
+        bCol = new int[]{-1, 1, -1, 1, 2, 2, -2,-2};
+
+        for (int i=0; i < 8; i++){
+            ChessPosition end = new ChessPosition(row + bRows[i], col + bCol[i]);
+
+            if      (board.getPiece(end) != null && board.isEnemyPiece(king, end)
+                    && board.isInBounds(end)) {
+                if (board.getPiece(end).getPieceType() == (ChessPiece.PieceType.KNIGHT)) {
+                    return true;
+                }
+            }
+        }
+
+        //Checking for pawns in capture range.
+        switch (color){
+            case BLACK: {
+                for (int i=-1; i < 2; i+=2){
+                    ChessPosition end = new ChessPosition(row-1, col+i);
+                    if (board.getPiece(end) != null && board.isInBounds(end)){
+                        ChessPiece temp =  board.getPiece(end);
+                        if (temp.getPieceType() == ChessPiece.PieceType.PAWN){
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            case WHITE: {
+                for (int i=-1; i < 2; i+=2){
+                    ChessPosition end = new ChessPosition(row+1, col+i);
+                    if (board.getPiece(end) != null && board.isInBounds(end)){
+                        ChessPiece temp =  board.getPiece(end);
+                        if (temp.getPieceType() == ChessPiece.PieceType.PAWN){
+                            return true;
+                        }
+                    }
+                }
+            }
+            break;
+        }
+        return false;
+    }
+
+
 }

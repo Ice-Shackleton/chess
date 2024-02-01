@@ -176,5 +176,13 @@ public class ChessBoard {
         return Arrays.deepHashCode(board);
     }
 
-
+    public ChessBoard deepCopy(){
+        ChessBoard temp = new ChessBoard();
+        for (int r=0; r<7; r++){
+            for (int c=0; c<7; c++){
+                temp.board[r][c] = this.board[r][c];
+            }
+        }
+       return temp;
+    }
 }
