@@ -96,7 +96,7 @@ public class ChessGame {
                 }
                 if(example.getTeamColor() == TeamColor.WHITE){
                     this.whiteKing = move.getEndPosition();
-                    this.whiteCastle = true;
+                    this.whiteCastle = false;
                 }
             }
 
@@ -109,21 +109,23 @@ public class ChessGame {
                     this.whiteCastle = true;
                 }
             }
+            //Change the turn to be the opposing color.
+            if (this.currentTurn == TeamColor.WHITE) {this.currentTurn = TeamColor.BLACK;}
+            else if (this.currentTurn == TeamColor.BLACK) { this.currentTurn = TeamColor.WHITE;}
         }
     }
 
     /**
      * Determines if the given team is in check.
-     * This function will loop through each space on the {@link ChessBoard} and collate a HashSet
-     * of all possible valid moves all enemy pieces could make. It will make a deep copy of the board
-     * after the hypothetical move and, if the King's position after the move is in the collated
-     * HashSet, it will return true.
      *
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition kingSpace;
+        if (teamColor == TeamColor.WHITE) {kingSpace = this.whiteKing;}
+        else {kingSpace = this.blackKing;}
+        return kingThreatened(this.boardState, kingSpace, teamColor);
     }
 
     /**
@@ -185,7 +187,16 @@ public class ChessGame {
         return that;
     }
 
-
+    /**
+     * This function will loop through each space on the provided {@link ChessBoard}
+     * where the king could be put into check by an enemy piece. If any of those spaces
+     * have the appropriate enemy piece on them, it returns true.
+     *
+     * @param board The passed in chess board, often from a hypothetical move.
+     * @param king The king's current position on the board, often from a hypothetical move.
+     * @param color The color of the king who is potentially in check.
+     * @return True if the king is in check, false if not.
+     */
     private boolean kingThreatened(ChessBoard board, ChessPosition king, TeamColor color){
         int row = king.getRow();
         int col = king.getColumn();
@@ -199,7 +210,7 @@ public class ChessGame {
                 end = new ChessPosition(end.getRow()+bRows[i], end.getColumn()+bCol[i]);
             }
 
-            if ((board.getPiece(end) != null) && board.isEnemyPiece(king, end){
+            if ((board.getPiece(end) != null) && board.isEnemyPiece(king, end)){
                 if ((board.getPiece(end).getPieceType() == (ChessPiece.PieceType.BISHOP))
                         || (board.getPiece(end).getPieceType() == (ChessPiece.PieceType.QUEEN))){
                     return true;
