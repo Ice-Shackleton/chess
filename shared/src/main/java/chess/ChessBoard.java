@@ -178,8 +178,8 @@ public class ChessBoard {
 
     public ChessBoard deepCopy(){
         ChessBoard temp = new ChessBoard();
-        for (int r=0; r<7; r++){
-            for (int c=0; c<7; c++){
+        for (int r=0; r<8; r++){
+            for (int c=0; c<8; c++){
                 temp.board[r][c] = this.board[r][c];
             }
         }

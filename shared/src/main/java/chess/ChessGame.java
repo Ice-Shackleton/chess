@@ -83,10 +83,26 @@ public class ChessGame {
         Collection<ChessMove> temp = this.validMoves(move.getStartPosition());
         ChessPiece example = this.boardState.getPiece(move.getStartPosition());
         ChessGame.TeamColor tempColor = example.getTeamColor();
-        if (temp.contains(move) && (tempColor == this.currentTurn)) {
+
+        if (!temp.contains(move) || (tempColor != this.currentTurn)) {
+            throw new InvalidMoveException();
+        }
+
+        //we check if the move would leave the king in check.
+        ChessBoard storage = this.boardState.deepCopy();
+        this.boardState = hypotheticalMove(move);
+        if (isInCheck(tempColor)){
+            this.boardState = storage.deepCopy();
+            throw new InvalidMoveException();
+        }
+            this.boardState = storage.deepCopy();
             this.boardState.removePiece(move.getStartPosition());
             this.boardState.removePiece(move.getEndPosition());
-            this.boardState.addPiece(move.getEndPosition(), example);
+            if (move.getPromotionPiece() == null){ this.boardState.addPiece(move.getEndPosition(), example);}
+            else {
+                example = new ChessPiece(tempColor, move.getPromotionPiece());
+                this.boardState.addPiece(move.getEndPosition(), example);
+            }
 
             //This allows for the easy tracking of the kings' position.
             if(boardState.getPiece(move.getEndPosition()).getPieceType() == ChessPiece.PieceType.KING){
@@ -112,7 +128,7 @@ public class ChessGame {
             //Change the turn to be the opposing color.
             if (this.currentTurn == TeamColor.WHITE) {this.currentTurn = TeamColor.BLACK;}
             else if (this.currentTurn == TeamColor.BLACK) { this.currentTurn = TeamColor.WHITE;}
-        }
+
     }
 
     /**
@@ -156,6 +172,29 @@ public class ChessGame {
      */
     public void setBoard(ChessBoard board) {
         this.boardState = board;
+        this.whiteKing = new ChessPosition(20, 20);
+        this.blackKing = new ChessPosition(20, 20);
+        for (int i=1; i<9;i++){
+            for (int j=1; j<9;j++){
+                ChessPosition temp = new ChessPosition(i,j);
+                ChessPiece temp2 = this.boardState.getPiece(temp);
+                if (temp2 != null){
+                    if (temp2.getPieceType() == ChessPiece.PieceType.KING){
+                        switch (temp2.getTeamColor()){
+                            case BLACK: {
+                                this.blackKing = temp;
+                                break;
+                            }
+                            case WHITE: {
+                                this.whiteKing = temp;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
     }
 
     /**
@@ -198,6 +237,9 @@ public class ChessGame {
      * @return True if the king is in check, false if not.
      */
     private boolean kingThreatened(ChessBoard board, ChessPosition king, TeamColor color){
+        if (!this.boardState.isInBounds(king)){
+            return false;
+        }
         int row = king.getRow();
         int col = king.getColumn();
         //First, we check the diagonals.
@@ -227,11 +269,11 @@ public class ChessGame {
             while (board.getPiece(end) == null && board.isInBounds(end)){
                 end = new ChessPosition(end.getRow()+bRows[i], end.getColumn()+bCol[i]);
             }
-
-            if ((board.getPiece(end).getPieceType() == (ChessPiece.PieceType.ROOK))
-                    || (board.getPiece(end).getPieceType() == (ChessPiece.PieceType.QUEEN))){
-                return true;
-            }
+            if (board.getPiece(end) != null && board.isEnemyPiece(king, end)){
+                if ((board.getPiece(end).getPieceType() == (ChessPiece.PieceType.ROOK))
+                        || (board.getPiece(end).getPieceType() == (ChessPiece.PieceType.QUEEN))){
+                    return true;
+            }}
         }
 
         //now, we test for the knights in range.
@@ -254,7 +296,7 @@ public class ChessGame {
             case BLACK: {
                 for (int i=-1; i < 2; i+=2){
                     ChessPosition end = new ChessPosition(row-1, col+i);
-                    if (board.getPiece(end) != null && board.isInBounds(end)){
+                    if (board.getPiece(end) != null && board.isInBounds(end) && board.isEnemyPiece(king, end)){
                         ChessPiece temp =  board.getPiece(end);
                         if (temp.getPieceType() == ChessPiece.PieceType.PAWN){
                             return true;
@@ -266,7 +308,7 @@ public class ChessGame {
             case WHITE: {
                 for (int i=-1; i < 2; i+=2){
                     ChessPosition end = new ChessPosition(row+1, col+i);
-                    if (board.getPiece(end) != null && board.isInBounds(end)){
+                    if (board.getPiece(end) != null && board.isInBounds(end) && board.isEnemyPiece(king, end)){
                         ChessPiece temp =  board.getPiece(end);
                         if (temp.getPieceType() == ChessPiece.PieceType.PAWN){
                             return true;

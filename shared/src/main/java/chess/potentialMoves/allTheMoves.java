@@ -14,7 +14,7 @@ public class allTheMoves {
 
     public static Collection<ChessMove> moveCalculator(ChessBoard board, ChessPosition start) {
         if(!board.isInBounds(start)){
-            return null;
+            return new HashSet<ChessMove>();
         }
         HashSet<ChessMove> moveSet = new HashSet<ChessMove>();
         ChessPiece thisPiece = board.getPiece(start);
@@ -50,7 +50,7 @@ public class allTheMoves {
         if(moveSet.size() > 0){
             return moveSet;
         }
-        return null;
+        return new HashSet<>();
     }
 
 
