@@ -61,7 +61,9 @@ public class ChessGame {
     }
 
     /**
-     * Gets a valid moves for a piece at the given location
+     * Gets a valid moves for a piece at the given location. APPARENTLY, THIS SHOULD ONLY RETURN MOVES THAT DO
+     * NOT LEAVE THE KING IN CHECK, BUT WHY WOULD YOU BOTHER EXPLAINING THAT IN THE DOCS??? NOOOO, JUST LEAVE IT IN THE
+     * TESTS FOR STUDENTS TO FIND OUT AT 3 AM, WHY DON'T YOU!
      *
      * @param startPosition the piece to get valid moves for
      * @return Set of valid moves for requested piece, or null if no piece at
@@ -69,7 +71,43 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece temp = this.boardState.getPiece(startPosition);
-        return temp.pieceMoves(this.boardState, startPosition);
+        Collection<ChessMove> theStuff = temp.pieceMoves(this.boardState, startPosition);
+        Collection<ChessMove> list = temp.pieceMoves(this.boardState, startPosition);
+        ChessPosition whiteStorage = new ChessPosition(this.whiteKing.getRow(), this.whiteKing.getColumn());
+        ChessPosition blackStorage = new ChessPosition(this.blackKing.getRow(), this.blackKing.getColumn());
+
+        for (ChessMove valid:list){
+            ChessBoard storage = this.boardState.deepCopy();
+            if (this.boardState.getPiece(startPosition) != null) {
+                //It is important to track the king's position on the board throughout this process.
+                //Hence, these blocks of code.
+                if (this.boardState.getPiece(startPosition).getPieceType() == ChessPiece.PieceType.KING){
+                    switch (this.boardState.getPiece(startPosition).getTeamColor()){
+                        case WHITE: whiteStorage = this.whiteKing; break;
+                        case BLACK: blackStorage = this.blackKing; break;
+                    }
+                }
+            }
+
+            this.boardState = hypotheticalMove(valid);
+            if (this.boardState.getPiece(valid.getEndPosition()) != null) {
+                if (this.boardState.getPiece(valid.getEndPosition()).getPieceType() == ChessPiece.PieceType.KING){
+                    switch (this.boardState.getPiece(valid.getEndPosition()).getTeamColor()){
+                        case WHITE: this.whiteKing = valid.getEndPosition(); break;
+                        case BLACK: this.blackKing = valid.getEndPosition(); break;
+                    }
+                }
+            }
+
+            if (isInCheck(temp.getTeamColor())){
+                theStuff.remove(valid);
+            }
+
+            this.boardState = storage.deepCopy();
+            this.whiteKing = whiteStorage;
+            this.blackKing = blackStorage;
+        }
+        return theStuff;
     }
 
     /**
@@ -88,23 +126,16 @@ public class ChessGame {
             throw new InvalidMoveException();
         }
 
-        //we check if the move would leave the king in check.
-        ChessBoard storage = this.boardState.deepCopy();
-        this.boardState = hypotheticalMove(move);
-        if (isInCheck(tempColor)){
-            this.boardState = storage.deepCopy();
-            throw new InvalidMoveException();
+        //we move the piece.
+        this.boardState.removePiece(move.getStartPosition());
+        this.boardState.removePiece(move.getEndPosition());
+        if (move.getPromotionPiece() == null){ this.boardState.addPiece(move.getEndPosition(), example);}
+        else {
+            example = new ChessPiece(tempColor, move.getPromotionPiece());
+            this.boardState.addPiece(move.getEndPosition(), example);
         }
-            this.boardState = storage.deepCopy();
-            this.boardState.removePiece(move.getStartPosition());
-            this.boardState.removePiece(move.getEndPosition());
-            if (move.getPromotionPiece() == null){ this.boardState.addPiece(move.getEndPosition(), example);}
-            else {
-                example = new ChessPiece(tempColor, move.getPromotionPiece());
-                this.boardState.addPiece(move.getEndPosition(), example);
-            }
-
-            //This allows for the easy tracking of the kings' position.
+        //This allows for the easy tracking of the kings' position.
+        if (boardState.getPiece(move.getEndPosition()) != null){
             if(boardState.getPiece(move.getEndPosition()).getPieceType() == ChessPiece.PieceType.KING){
                 if (example.getTeamColor() == TeamColor.BLACK){
                     this.blackKing = move.getEndPosition();
@@ -115,8 +146,11 @@ public class ChessGame {
                     this.whiteCastle = false;
                 }
             }
+        }
+
 
             //Finally, we track if castling is still okay.
+        if (boardState.getPiece(move.getEndPosition()) != null){
             if(boardState.getPiece(move.getEndPosition()).getPieceType() == ChessPiece.PieceType.ROOK){
                 if (example.getTeamColor() == TeamColor.BLACK){
                     blackCastle = false;
@@ -125,10 +159,11 @@ public class ChessGame {
                     this.whiteCastle = true;
                 }
             }
-            //Change the turn to be the opposing color.
-            if (this.currentTurn == TeamColor.WHITE) {this.currentTurn = TeamColor.BLACK;}
-            else if (this.currentTurn == TeamColor.BLACK) { this.currentTurn = TeamColor.WHITE;}
+        }
 
+        //Change the turn to be the opposing color.
+        if (this.currentTurn == TeamColor.WHITE) {this.currentTurn = TeamColor.BLACK;}
+        else if (this.currentTurn == TeamColor.BLACK) { this.currentTurn = TeamColor.WHITE;}
     }
 
     /**
@@ -172,22 +207,10 @@ public class ChessGame {
 
         //then, we check all the valid moves the king piece can make.
         Collection<ChessMove> kingMoves = this.validMoves(that);
-        for (ChessMove valid:kingMoves){
-            ChessBoard storage = this.boardState.deepCopy();
-            this.boardState = hypotheticalMove(valid);
-            ChessPosition whiteStorage = new ChessPosition(this.whiteKing.getRow(), this.whiteKing.getColumn());
-            ChessPosition blackStorage = new ChessPosition(this.blackKing.getRow(), this.blackKing.getColumn());
-            switch(teamColor){
-                case WHITE: this.whiteKing = valid.getEndPosition(); break;
-                case BLACK: this.blackKing = valid.getEndPosition(); break;
-            }
-            if (!this.isInCheck(teamColor)){
-                return false;
-            }
-            this.boardState = storage.deepCopy();
-            this.whiteKing = whiteStorage;
-            this.blackKing = blackStorage;
+        if (!kingMoves.isEmpty()){
+            return false;
         }
+
         return true;
     }
 
@@ -220,21 +243,8 @@ public class ChessGame {
 
         //then, we check all the valid moves the king piece can make.
         Collection<ChessMove> kingMoves = this.validMoves(that);
-        for (ChessMove valid:kingMoves){
-            ChessBoard storage = this.boardState.deepCopy();
-            this.boardState = hypotheticalMove(valid);
-            ChessPosition whiteStorage = new ChessPosition(this.whiteKing.getRow(), this.whiteKing.getColumn());
-            ChessPosition blackStorage = new ChessPosition(this.blackKing.getRow(), this.blackKing.getColumn());
-            switch(teamColor){
-                case WHITE: this.whiteKing = valid.getEndPosition(); break;
-                case BLACK: this.blackKing = valid.getEndPosition(); break;
-            }
-            if (!this.isInCheck(teamColor)){
-                return false;
-            }
-            this.boardState = storage.deepCopy();
-            this.whiteKing = whiteStorage;
-            this.blackKing = blackStorage;
+        if (!kingMoves.isEmpty()){
+            return false;
         }
         return true;
     }
@@ -289,14 +299,10 @@ public class ChessGame {
      */
     private ChessBoard hypotheticalMove(ChessMove move){
         ChessBoard that = this.boardState.deepCopy();
-        Collection<ChessMove> temp = this.validMoves(move.getStartPosition());
         ChessPiece example = that.getPiece(move.getStartPosition());
-        ChessGame.TeamColor tempColor = example.getTeamColor();
-        if (temp.contains(move)) {
-            that.removePiece(move.getStartPosition());
-            that.removePiece(move.getEndPosition());
-            that.addPiece(move.getEndPosition(), example);
-        }
+        that.removePiece(move.getStartPosition());
+        that.removePiece(move.getEndPosition());
+        that.addPiece(move.getEndPosition(), example);
         return that;
     }
 

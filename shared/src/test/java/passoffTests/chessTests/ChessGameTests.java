@@ -656,7 +656,7 @@ public class ChessGameTests {
             ChessPosition queenPosition = getNewPosition(2, 4);
             validMoves = loadMoves(queenPosition, new int[][]{{3, 5}, {4, 4}});
             assertMoves(game, validMoves, queenPosition);
-        }
+           }
 
 
         @Test

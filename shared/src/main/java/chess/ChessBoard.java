@@ -103,7 +103,9 @@ public class ChessBoard {
         }
         ChessPiece mover = this.getPiece(start);
         ChessPiece blocker = this.getPiece(end);
-
+        if (mover == null || blocker == null) {
+            return false;
+        }
         return !(mover.getTeamColor() == blocker.getTeamColor());
     }
 
