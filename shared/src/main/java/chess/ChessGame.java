@@ -151,7 +151,44 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition that;
+        switch (teamColor){
+            case WHITE: {
+                that = this.whiteKing;
+                break;
+            }
+            case BLACK: {
+                that = this.blackKing;
+                break;
+            }
+            case null: {
+                return false;
+            }
+        }
+        //first, we check if king is in check.
+        if (!this.isInCheck(teamColor)){
+            return false;
+        }
+
+        //then, we check all the valid moves the king piece can make.
+        Collection<ChessMove> kingMoves = this.validMoves(that);
+        for (ChessMove valid:kingMoves){
+            ChessBoard storage = this.boardState.deepCopy();
+            this.boardState = hypotheticalMove(valid);
+            ChessPosition whiteStorage = new ChessPosition(this.whiteKing.getRow(), this.whiteKing.getColumn());
+            ChessPosition blackStorage = new ChessPosition(this.blackKing.getRow(), this.blackKing.getColumn());
+            switch(teamColor){
+                case WHITE: this.whiteKing = valid.getEndPosition(); break;
+                case BLACK: this.blackKing = valid.getEndPosition(); break;
+            }
+            if (!this.isInCheck(teamColor)){
+                return false;
+            }
+            this.boardState = storage.deepCopy();
+            this.whiteKing = whiteStorage;
+            this.blackKing = blackStorage;
+        }
+        return true;
     }
 
     /**
@@ -248,15 +285,19 @@ public class ChessGame {
         for (int i=0; i < 4; i++){
             ChessPosition end = new ChessPosition(row + bRows[i],
                     col + bCol[i]);
-            while (board.getPiece(end) == null && board.isInBounds(end)){
-                end = new ChessPosition(end.getRow()+bRows[i], end.getColumn()+bCol[i]);
+            while (board.getPiece(end) == null && board.isInBounds(end)) {
+                end = new ChessPosition(end.getRow() + bRows[i], end.getColumn() + bCol[i]);
             }
-
-            if ((board.getPiece(end) != null) && board.isEnemyPiece(king, end)){
-                if ((board.getPiece(end).getPieceType() == (ChessPiece.PieceType.BISHOP))
-                        || (board.getPiece(end).getPieceType() == (ChessPiece.PieceType.QUEEN))){
-                    return true;
+            ChessPiece testing = board.getPiece(end);
+            if (board.getPiece(end) != null){
+                if (board.isEnemyPiece(king, end)){
+                    if ((board.getPiece(end).getPieceType() == (ChessPiece.PieceType.BISHOP))
+                            || (board.getPiece(end).getPieceType() == (ChessPiece.PieceType.QUEEN))){
+                        return true;
+                    }
                 }
+
+
             }
 
         }
@@ -317,6 +358,21 @@ public class ChessGame {
                 }
             }
             break;
+        }
+
+        //Checking for kings in capture range.
+        bRows = new int[]{0, 0, 1, 1, 1,-1,-1,-1};
+        bCol =  new int[]{1,-1, 1,-1, 0, 1,-1, 0};
+        for (int i=0; i < 8; i++){
+            ChessPosition end = new ChessPosition(row + bRows[i], col + bCol[i]);
+
+            if      (board.getPiece(end) != null
+                    && board.isEnemyPiece(king, end)
+                    && board.isInBounds(end)
+                    && board.getPiece(end).getPieceType() == ChessPiece.PieceType.KING)
+            {
+                return true;
+            }
         }
         return false;
     }

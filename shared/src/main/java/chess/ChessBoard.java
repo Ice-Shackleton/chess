@@ -88,6 +88,9 @@ public class ChessBoard {
     }
 
     public boolean isInBounds(ChessPosition position){
+        if (position == null){
+            return false;
+        }
         int trueRow = position.getRow();
         int trueCol = position.getColumn();
 
@@ -95,6 +98,9 @@ public class ChessBoard {
     }
 
     public boolean isEnemyPiece(ChessPosition start, ChessPosition end){
+        if (start == null || end == null){
+            return false;
+        }
         ChessPiece mover = this.getPiece(start);
         ChessPiece blocker = this.getPiece(end);
 
