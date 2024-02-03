@@ -199,7 +199,44 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition that;
+        switch (teamColor){
+            case WHITE: {
+                that = this.whiteKing;
+                break;
+            }
+            case BLACK: {
+                that = this.blackKing;
+                break;
+            }
+            case null: {
+                return false;
+            }
+        }
+        //first, we check if king is in check. If he is, it's not a stalemate.
+        if (this.isInCheck(teamColor)){
+            return false;
+        }
+
+        //then, we check all the valid moves the king piece can make.
+        Collection<ChessMove> kingMoves = this.validMoves(that);
+        for (ChessMove valid:kingMoves){
+            ChessBoard storage = this.boardState.deepCopy();
+            this.boardState = hypotheticalMove(valid);
+            ChessPosition whiteStorage = new ChessPosition(this.whiteKing.getRow(), this.whiteKing.getColumn());
+            ChessPosition blackStorage = new ChessPosition(this.blackKing.getRow(), this.blackKing.getColumn());
+            switch(teamColor){
+                case WHITE: this.whiteKing = valid.getEndPosition(); break;
+                case BLACK: this.blackKing = valid.getEndPosition(); break;
+            }
+            if (!this.isInCheck(teamColor)){
+                return false;
+            }
+            this.boardState = storage.deepCopy();
+            this.whiteKing = whiteStorage;
+            this.blackKing = blackStorage;
+        }
+        return true;
     }
 
     /**
@@ -255,7 +292,7 @@ public class ChessGame {
         Collection<ChessMove> temp = this.validMoves(move.getStartPosition());
         ChessPiece example = that.getPiece(move.getStartPosition());
         ChessGame.TeamColor tempColor = example.getTeamColor();
-        if (temp.contains(move) && (tempColor == this.currentTurn)) {
+        if (temp.contains(move)) {
             that.removePiece(move.getStartPosition());
             that.removePiece(move.getEndPosition());
             that.addPiece(move.getEndPosition(), example);
@@ -344,6 +381,7 @@ public class ChessGame {
                         }
                     }
                 }
+                break;
             }
 
             case WHITE: {
@@ -356,8 +394,9 @@ public class ChessGame {
                         }
                     }
                 }
+                break;
             }
-            break;
+
         }
 
         //Checking for kings in capture range.
@@ -374,6 +413,7 @@ public class ChessGame {
                 return true;
             }
         }
+
         return false;
     }
 
