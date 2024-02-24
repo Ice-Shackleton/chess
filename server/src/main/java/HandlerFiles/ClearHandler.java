@@ -20,7 +20,7 @@ public class ClearHandler {
 
         this.clean.clearAll();
         q.status(200);
-        return null;
+        return "{}";
     }
 
 }

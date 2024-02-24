@@ -8,6 +8,8 @@ public interface UserDAO {
 
     public void clearAccess();
 
-    public void getUser(String username) throws dataAccess.DataAccessException;
+    public UserData getUser(String username);
+
+    public void createUser(String username, String email, String password);
 
 }

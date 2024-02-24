@@ -2,14 +2,15 @@ package DataAccess;
 
 import model.GameData;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class RAMGameDAO implements GameDAO{
 
-    private HashSet<GameData> gameData;
+    private HashMap<Integer, GameData> gameData;
 
     public RAMGameDAO() {
-        this.gameData = new HashSet<GameData>();
+        this.gameData = new HashMap<Integer, GameData>();
     }
 
     @Override

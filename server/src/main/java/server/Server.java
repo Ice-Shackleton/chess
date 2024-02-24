@@ -23,7 +23,8 @@ public class Server {
         GameDAO gameDAO = new RAMGameDAO();
         AuthDAO authDAO = new RAMAuthDAO();
         ClearService clearService = new ClearService(userDAO, gameDAO, authDAO);
-        Spark.delete("/db", ((request, response) -> new ClearHandler(clearService).clearServer(request,response)));
+
+        Spark.delete("/db", ((Request request, Response response) -> new ClearHandler(clearService).clearServer(request,response)));
 
 
         Spark.init();
