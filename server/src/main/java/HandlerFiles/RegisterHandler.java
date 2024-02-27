@@ -1,6 +1,8 @@
 package HandlerFiles;
 
 import Services.RegisterService;
+import com.google.gson.Gson;
+import model.UserData;
 import spark.Request;
 import spark.Response;
 
@@ -12,10 +14,9 @@ public class RegisterHandler {
         this.registerService = register;
     }
 
-    public String registerUser(Request r, Response q){
-        //String username = r.body()
-        //return this.registerService.register(username, email, password);
-        return null;
+    public String registerUser(Request r, Response q) throws dataAccess.DataAccessException {
+        UserData newRegister = new Gson().fromJson(r.body(), UserData.class);
+        return new Gson().toJson(this.registerService.register(newRegister.username(), newRegister.email(), newRegister.password()));
     }
 
 }
