@@ -28,11 +28,7 @@ public class RAMUserDAO implements UserDAO {
      */
     @Override
     public UserData getUser(String username){
-        UserData user = this.userData.get(username);
-        if (user != null){
-            return user;
-        }
-        return null;
+        return this.userData.get(username);
     }
 
     /**
@@ -46,6 +42,17 @@ public class RAMUserDAO implements UserDAO {
     public void createUser(String username, String email, String password) {
         UserData newUser = new UserData(username, password, email);
         this.userData.put(username, newUser);
+    }
+
+    /**
+     * A simple method to compare a passed-in password with a matching user in the database.
+     * @param username
+     * @param password
+     * @return true if passwords match, false otherwise.
+     */
+    public boolean checkPassword(String username, String password){
+        UserData user = this.userData.get(username);
+        return (password.equals(user.password()));
     }
 
 

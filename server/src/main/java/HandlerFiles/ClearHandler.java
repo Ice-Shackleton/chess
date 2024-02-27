@@ -3,6 +3,7 @@ package HandlerFiles;
 
 import DataAccess.UserDAO;
 import Services.ClearService;
+import com.google.gson.Gson;
 import spark.Request;
 import spark.Response;
 
@@ -17,10 +18,9 @@ public class ClearHandler {
         //clear the map that represents the game data.
         //Call ClearService.
         //return q.status(200) if works.
-
         this.clean.clearAll();
         q.status(200);
-        return "{}";
+        return new Gson().toJson("{}");
     }
 
 }

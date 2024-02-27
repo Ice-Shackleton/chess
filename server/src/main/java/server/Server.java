@@ -2,8 +2,10 @@ package server;
 
 import DataAccess.*;
 import HandlerFiles.ClearHandler;
+import HandlerFiles.LoginHandler;
 import HandlerFiles.RegisterHandler;
 import Services.ClearService;
+import Services.LoginService;
 import Services.RegisterService;
 import spark.*;
 
@@ -24,10 +26,14 @@ public class Server {
         UserDAO userDAO = new RAMUserDAO();
         GameDAO gameDAO = new RAMGameDAO();
         AuthDAO authDAO = new RAMAuthDAO();
+
         ClearService clearService = new ClearService(userDAO, gameDAO, authDAO);
         RegisterService registerService = new RegisterService(userDAO, authDAO);
+        LoginService loginService = new LoginService(userDAO, authDAO);
+
         Spark.delete("/db", ((Request request, Response response) -> new ClearHandler(clearService).clearServer(request,response)));
         Spark.post("/user", ((Request request, Response response) -> new RegisterHandler(registerService).registerUser(request, response)));
+        Spark.post("/session", ((Request request, Response response) -> new LoginHandler(loginService).loginService(request, response)));
 
         Spark.init();
         Spark.awaitInitialization();

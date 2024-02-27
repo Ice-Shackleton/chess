@@ -12,4 +12,6 @@ public interface UserDAO {
 
     public void createUser(String username, String email, String password);
 
+    public boolean checkPassword(String username, String password);
+
 }
