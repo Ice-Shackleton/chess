@@ -1,7 +1,6 @@
 package HandlerFiles;
 
 
-import DataAccess.UserDAO;
 import Services.ClearService;
 import com.google.gson.Gson;
 import spark.Request;

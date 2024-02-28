@@ -31,4 +31,18 @@ public class RAMAuthDAO implements AuthDAO{
         this.authData.put(authToken, newAuthToken);
         return authToken;
     }
+
+    @Override
+    public AuthData getAuth(String authToken) {
+        return this.authData.get(authToken);
+    }
+
+    /**
+     * Deletes the specified authToken.
+     * @param authToken
+     */
+    @Override
+    public void deleteAuth(String authToken) {
+        this.authData.remove(authToken);
+    }
 }
