@@ -27,7 +27,6 @@ public class LoginHandler {
             return new Gson().toJson(new Message("Error: unauthorized"));
         }
         q.status(200);
-
         return new Gson().toJson(new LoginMessage(stuff.username(), loginAttempt));
     }
 }

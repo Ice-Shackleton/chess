@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public class RAMUserDAO implements UserDAO {
 
-    private HashMap<String, UserData> userData;
+    private final HashMap<String, UserData> userData;
 
     public RAMUserDAO() {
         this.userData = new HashMap<String, UserData>();

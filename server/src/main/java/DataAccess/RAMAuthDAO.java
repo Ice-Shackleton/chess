@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public class RAMAuthDAO implements AuthDAO{
 
-    private HashMap<String, AuthData> authData;
+    private final HashMap<String, AuthData> authData;
 
     public RAMAuthDAO() {
         this.authData = new HashMap<String, AuthData>();

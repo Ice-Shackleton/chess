@@ -3,6 +3,7 @@ package HandlerFiles;
 
 import Services.ClearService;
 import com.google.gson.Gson;
+import model.Message;
 import spark.Request;
 import spark.Response;
 
@@ -19,7 +20,7 @@ public class ClearHandler {
         //return q.status(200) if works.
         this.clean.clearAll();
         q.status(200);
-        return new Gson().toJson("{}");
+        return new Gson().toJson(new Message("{}"));
     }
 
 }

@@ -26,6 +26,8 @@ public class ChessGame {
     private boolean blackCastle;
     private boolean whiteCastle;
 
+    private String gameName;
+
     public ChessGame() {
         this.currentTurn = TeamColor.WHITE;
         this.boardState = new ChessBoard();
@@ -34,6 +36,7 @@ public class ChessGame {
         this.blackKing = new ChessPosition(8, 5);
         this.blackCastle = true;
         this.whiteCastle = true;
+        this.gameName = "";
     }
 
     /**
@@ -288,6 +291,14 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return this.boardState;
+    }
+
+    /**
+     * This method is primarily used for server communication.
+     * @return the game's name.
+     */
+    public String getGameName(){
+        return this.gameName;
     }
 
     /**
