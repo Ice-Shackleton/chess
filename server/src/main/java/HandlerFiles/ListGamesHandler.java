@@ -17,7 +17,7 @@ public class ListGamesHandler {
         this.listGameService = listGameService;
     }
 
-    public Object listService(Request r, Response q){
+    public Object listHandler(Request r, Response q){
         String token = r.headers("authorization");
         ArrayList<GameData> gameStuff = null;
         try {
