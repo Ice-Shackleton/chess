@@ -4,7 +4,6 @@ import DataAccess.BadAccessException;
 import Services.CreateGameService;
 import com.google.gson.Gson;
 import model.Message;
-import model.UserData;
 import spark.Request;
 import spark.Response;
 
@@ -18,10 +17,10 @@ public class CreateGameHandler {
 
     public Object createHandler(Request r, Response q){
         String authToken = r.headers("authorization");
-        String gameName = new Gson().fromJson(r.body(), String.class);
-        Integer gameID = -1;
+        GameName gameName = new Gson().fromJson(r.body(), GameName.class);
+        int gameID = -1;
         try{
-            this.createGameService.CreateGame(authToken, gameName);
+            gameID = this.createGameService.CreateGame(authToken, gameName.gameName());
         } catch (dataAccess.DataAccessException wrongToken){
             q.status(401);
             return new Gson().toJson(new Message("Error: unauthorized"));
@@ -29,6 +28,10 @@ public class CreateGameHandler {
             q.status(400);
             return new Gson().toJson(new Message("Error: bad request"));
         }
-        return new Gson().toJson(new Message(gameID.toString()));
+        return new Gson().toJson(new IdResponse(Integer.toString(gameID)));
     }
 }
+
+record GameName(String gameName){}
+
+record IdResponse(String gameID){}

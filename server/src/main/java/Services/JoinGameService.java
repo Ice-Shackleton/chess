@@ -1,9 +1,6 @@
 package Services;
 
-import DataAccess.AuthDAO;
-import DataAccess.BadAccessException;
-import DataAccess.GameDAO;
-import DataAccess.IncorrectException;
+import DataAccess.*;
 import model.AuthData;
 
 public class JoinGameService {
@@ -17,10 +14,9 @@ public class JoinGameService {
     }
 
     public void joinGame(String authToken, String color, int gameID)
-            throws BadAccessException, dataAccess.DataAccessException, IncorrectException
-    {
+            throws BadAccessException, dataAccess.DataAccessException, IncorrectException {
         AuthData token = this.authDAO.getAuth(authToken);
-        String username = token.username();
+
 
         if (color != null && (!(color.equals("WHITE")) && !(color.equals("BLACK")))) {
             throw new BadAccessException("user put in an invalid color");
@@ -28,10 +24,14 @@ public class JoinGameService {
         if(token == null){
             throw new dataAccess.DataAccessException("user entered invalid authToken");
         }
+        String username = token.username();
         if(this.gameDAO.colorOccupied(color, gameID)){
             throw new IncorrectException("user attempted to join an already occupied spot.");
         }
 
-        this.gameDAO.joinGame(color, gameID, username);
+        boolean testCase = this.gameDAO.joinGame(color, gameID, username);
+        if (!testCase) {
+            throw new BadAccessException("user provided an invalid gameID.");
+        }
     }
 }

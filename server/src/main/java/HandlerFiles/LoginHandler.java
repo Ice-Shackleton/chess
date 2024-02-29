@@ -20,7 +20,7 @@ public class LoginHandler {
         try {
             loginAttempt = this.login.login(stuff.username(), stuff.password());
         } catch(dataAccess.DataAccessException user) {
-            q.status(500);
+            q.status(401);
             return new Gson().toJson(new Message("Error: username does not exist."));
         } catch(IncorrectException wrongPassword) {
             q.status(401);

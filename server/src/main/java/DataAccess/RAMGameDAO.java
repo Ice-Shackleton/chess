@@ -5,7 +5,6 @@ import model.GameData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class RAMGameDAO implements GameDAO{
 
@@ -46,7 +45,10 @@ public class RAMGameDAO implements GameDAO{
     @Override
     public boolean colorOccupied(String color, int gameID) {
         if(color == null){
-            return true;
+            return false;
+        }
+        if(this.gameData.get(gameID) == null){
+            return false;
         }
         if(color.equals("WHITE")){
             return !(this.gameData.get(gameID).whiteUsername() == null);
@@ -74,41 +76,46 @@ public class RAMGameDAO implements GameDAO{
     /**
      * Adds a user to a game. If no color is specified the user is joined as an observer, unless that user
      * is already observing the game.
-     * @param color Must be either 'WHITE' or 'BLACK'
+     *
+     * @param color    Must be either 'WHITE' or 'BLACK'
      * @param gameID
      * @param username
+     * @return
      */
     @Override
-    public void joinGame(String color, int gameID, String username){
-        if(color == null){
+    public boolean joinGame(String color, int gameID, String username){
+        if (!(this.gameData.get(gameID) == null)) {
+            if (color == null) {
 
-            ArrayList<String> temp;
-            if(!(this.gameData.get(gameID) == null)){
-                temp = this.observers.get(gameID);
+                ArrayList<String> temp;
+                if (this.gameData.get(gameID) == null) {
+                    temp = this.observers.get(gameID);
+                } else {
+                    temp = new ArrayList<String>();
+                }
+
+                if (temp != null && !(temp.contains(username))) {
+                    temp.add(username);
+                }
+                this.observers.put(gameID, temp);
+
             } else {
-                temp = new ArrayList<String>();
-            }
 
-            if (!(temp.contains(username))){
-                temp.add(username);
-            }
-            this.observers.put(gameID, temp);
+                ChessGame game = this.gameData.get(gameID).game();
+                if (color.equals("WHITE")) {
+                    String blackUser = this.gameData.get(gameID).blackUsername();
+                    GameData newColor = new GameData(gameID, username, blackUser, game);
+                    this.gameData.put(gameID, newColor);
+                }
+                if (color.equals("BLACK")) {
+                    String whiteUser = this.gameData.get(gameID).whiteUsername();
+                    GameData newColor = new GameData(gameID, whiteUser, username, game);
+                    this.gameData.put(gameID, newColor);
+                }
 
-        } else {
-
-            ChessGame game = this.gameData.get(gameID).game();
-            if (color.equals("WHITE")){
-                String blackUser = this.gameData.get(gameID).blackUsername();
-                GameData newColor = new GameData(gameID, username, blackUser, game);
-                this.gameData.put(gameID, newColor);
             }
-            if (color.equals("BLACK")){
-                String whiteUser = this.gameData.get(gameID).whiteUsername();
-                GameData newColor = new GameData(gameID, whiteUser, username, game);
-                this.gameData.put(gameID, newColor);
-            }
-
+            return true;
         }
-
+        return false;
     }
 }

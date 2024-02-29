@@ -1,11 +1,8 @@
 package DataAccess;
 
 import model.GameData;
-import model.UserData;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 
 public interface GameDAO {
 
@@ -19,6 +16,6 @@ public interface GameDAO {
 
     public int createGame(String gameName);
 
-    public void joinGame(String color, int gameID, String username);
+    public boolean joinGame(String color, int gameID, String username);
 
 }

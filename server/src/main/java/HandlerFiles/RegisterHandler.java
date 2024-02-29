@@ -1,5 +1,6 @@
 package HandlerFiles;
 
+import DataAccess.BadAccessException;
 import Services.RegisterService;
 import com.google.gson.Gson;
 import model.Message;
@@ -23,11 +24,14 @@ public class RegisterHandler {
         } catch (dataAccess.DataAccessException userExists) {
             q.status(403);
             return new Gson().toJson(new Message("Error: already taken"));
+        } catch (BadAccessException noInfo){
+            q.status(400);
+            return new Gson().toJson(new Message("Error: bad request"));
         }
         q.status(200);
-        return new Gson().toJson(new registerMessage(newRegister.username(), temp));
+        return new Gson().toJson(new RegisterMessage(newRegister.username(), temp));
     }
 
 }
 
-record registerMessage(String username, String authToken){}
+record RegisterMessage(String username, String authToken){}

@@ -21,7 +21,7 @@ public class CreateGameService {
         if(token == null){
             throw new dataAccess.DataAccessException("no such authToken exists");
         }
-        if(gameName.isEmpty()){
+        if(gameName == null || gameName.isEmpty()){
             throw new BadAccessException("user did not supply game name");
         }
         return this.gameDAO.createGame(gameName);

@@ -18,7 +18,7 @@ public class JoinGameHandler {
 
     public Object joinHandler(Request r, Response q){
         String authToken = r.headers("authorization");
-        colorStorage dataStuff = new Gson().fromJson(r.body(), colorStorage.class);
+        ColorStorage dataStuff = new Gson().fromJson(r.body(), ColorStorage.class);
 
         try {
             this.joinGameService.joinGame(authToken, dataStuff.playerColor(), dataStuff.gameID());
@@ -37,4 +37,4 @@ public class JoinGameHandler {
     }
 }
 
-record colorStorage(String playerColor, int gameID){}
+record ColorStorage(String playerColor, int gameID){}

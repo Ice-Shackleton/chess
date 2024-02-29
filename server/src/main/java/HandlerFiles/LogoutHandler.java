@@ -25,7 +25,7 @@ public class LogoutHandler {
             return new Gson().toJson(new Message("Error: unauthorized"));
         }
         q.status(200);
-        return new Gson().toJson("{}");
+        return new Gson().toJson(new Message("{}"));
     }
 }
 
