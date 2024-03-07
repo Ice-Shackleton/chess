@@ -12,10 +12,12 @@ public class LogoutService {
     }
 
     public void logout(String authToken) throws dataAccess.DataAccessException {
-        AuthData token = this.authDAO.getAuth(authToken);
-        if(token == null){
-            throw new dataAccess.DataAccessException("no such authToken exists");
+        AuthData token;
+        try {
+            token = this.authDAO.getAuth(authToken);
+            this.authDAO.deleteAuth(token.authToken());
+        } catch (dataAccess.DataAccessException e) {
+            throw new dataAccess.DataAccessException("this token probably doesn't exist.");
         }
-        this.authDAO.deleteAuth(token.authToken());
     }
 }

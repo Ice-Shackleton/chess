@@ -18,7 +18,12 @@ public class ClearHandler {
         //clear the map that represents the game data.
         //Call ClearService.
         //return q.status(200) if works.
-        this.clean.clearAll();
+        try {
+            this.clean.clearAll();
+        } catch (dataAccess.DataAccessException e){
+            q.status(500);
+            return new Gson().toJson(new Message("Error: You done @#$%%! up, A-aron.."));
+        }
         q.status(200);
         return new Gson().toJson(new Message("{}"));
     }

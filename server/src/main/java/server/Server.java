@@ -17,11 +17,21 @@ public class Server {
         Spark.port(desiredPort);
         //Database temp = new Database();
         Spark.staticFiles.location("web");
-
         // Register your endpoints and handle exceptions here.
+
+
+
         UserDAO userDAO = new RAMUserDAO();
         GameDAO gameDAO = new RAMGameDAO();
-        AuthDAO authDAO = new RAMAuthDAO();
+        AuthDAO authDAO;
+        try {
+            ChessDatabaseManager.chessDatabase();
+            authDAO = new SQLAuthDAO();
+            // userDAO
+        } catch (dataAccess.DataAccessException e) {
+            System.out.println("database failed to start, you dummy.");
+            authDAO = new RAMAuthDAO();
+        }
 
         ClearService clearService = new ClearService(userDAO, gameDAO, authDAO);
         RegisterService registerService = new RegisterService(userDAO, authDAO);

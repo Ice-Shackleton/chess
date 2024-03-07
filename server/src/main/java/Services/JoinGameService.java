@@ -15,8 +15,12 @@ public class JoinGameService {
 
     public void joinGame(String authToken, String color, int gameID)
             throws BadAccessException, dataAccess.DataAccessException, IncorrectException {
-        AuthData token = this.authDAO.getAuth(authToken);
-
+        AuthData token;
+        try {
+            token = this.authDAO.getAuth(authToken);
+        } catch (dataAccess.DataAccessException e) {
+            throw new dataAccess.DataAccessException("this absolutely should not throw, you're an idiot");
+        }
 
         if (color != null && (!(color.equals("WHITE")) && !(color.equals("BLACK")))) {
             throw new BadAccessException("user put in an invalid color");

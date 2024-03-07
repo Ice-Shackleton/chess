@@ -19,7 +19,12 @@ public class ListGameService {
     }
 
     public ArrayList<GameData> listGames(String authToken) throws dataAccess.DataAccessException {
-        AuthData token = this.authDAO.getAuth(authToken);
+        AuthData token;
+        try {
+            token = this.authDAO.getAuth(authToken);
+        } catch (dataAccess.DataAccessException e) {
+            throw new dataAccess.DataAccessException("you're an idiot.");
+        }
         if(token == null){
             throw new dataAccess.DataAccessException("no such authToken exists");
         }

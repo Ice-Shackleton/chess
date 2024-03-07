@@ -18,6 +18,7 @@ public class RegisterService {
     }
 
     public String register(String username, String email, String password) throws dataAccess.DataAccessException, BadAccessException {
+
         UserData newUser = this.userDAO.getUser(username);
         if (newUser != null) {
             throw new dataAccess.DataAccessException("Tried to make a user with an already extant username.");
@@ -26,6 +27,10 @@ public class RegisterService {
             throw new BadAccessException("User did not provide specified fields.");
         }
         this.userDAO.createUser(username, email, password);
-        return this.authDAO.createAuth(username);
+        try {
+            return this.authDAO.createAuth(username);
+        } catch (dataAccess.DataAccessException e){
+            throw new dataAccess.DataAccessException("you've done something very wrong to see this.");
+        }
     }
 }

@@ -27,9 +27,13 @@ public class ClearService {
      * This method resets all DAOs to a blank state where no data is stored. The
      * objects still exist after.
      */
-    public void clearAll(){
+    public void clearAll() throws dataAccess.DataAccessException {
         this.userDAO.clearAccess();
         this.gameDAO.clearAccess();
-        this.authDAO.clearAccess();
+        try {
+            this.authDAO.clearAccess();
+        } catch (dataAccess.DataAccessException e){
+            throw new dataAccess.DataAccessException("You somehow failed the most basic task");
+        }
     }
 }
