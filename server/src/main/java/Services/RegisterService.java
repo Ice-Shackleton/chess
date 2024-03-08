@@ -30,7 +30,7 @@ public class RegisterService {
 
         try {
             this.userDAO.createUser(username, email, password);
-            return this.authDAO.createAuth(username);
+z            return this.authDAO.createAuth(username);
         } catch (dataAccess.DataAccessException e){
             throw new dataAccess.DataAccessException("you've done something very wrong to see this.");
         } catch (IncorrectException e) {

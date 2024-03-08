@@ -30,6 +30,10 @@ public class CreateGameService {
         if (gameName == null || gameName.isEmpty()) {
             throw new BadAccessException("user did not supply game name");
         }
-        return this.gameDAO.createGame(gameName);
+        try {
+            return this.gameDAO.createGame(gameName);
+        } catch (DataAccessException e) {
+            throw new DataAccessException("Never gonna GIVE YOU UP");
+        }
     }
 }

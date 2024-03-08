@@ -28,10 +28,10 @@ public class ClearService {
      * objects still exist after.
      */
     public void clearAll() throws dataAccess.DataAccessException {
-        this.gameDAO.clearAccess();
         try {
             this.authDAO.clearAccess();
             this.userDAO.clearAccess();
+            this.gameDAO.clearAccess();
         } catch (dataAccess.DataAccessException e){
             throw new dataAccess.DataAccessException("You somehow failed the most basic task");
         }

@@ -3,6 +3,8 @@ package Services;
 import DataAccess.*;
 import model.AuthData;
 
+import java.sql.SQLException;
+
 public class JoinGameService {
 
     private AuthDAO authDAO;
@@ -29,8 +31,12 @@ public class JoinGameService {
             throw new dataAccess.DataAccessException("user entered invalid authToken");
         }
         String username = token.username();
-        if(this.gameDAO.colorOccupied(color, gameID)){
-            throw new IncorrectException("user attempted to join an already occupied spot.");
+        try {
+            if(this.gameDAO.colorOccupied(color, gameID)){
+                throw new IncorrectException("user attempted to join an already occupied spot.");
+            }
+        } catch (SQLException | IncorrectException e) {
+            throw new IncorrectException(e.getMessage());
         }
 
         boolean testCase = this.gameDAO.joinGame(color, gameID, username);

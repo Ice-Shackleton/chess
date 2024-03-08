@@ -28,7 +28,11 @@ public class ListGameService {
         if(token == null){
             throw new dataAccess.DataAccessException("no such authToken exists");
         }
-        return this.gameDAO.getGameList();
+        try {
+            return this.gameDAO.getGameList();
+        } catch (dataAccess.DataAccessException e) {
+            throw new dataAccess.DataAccessException(e.getMessage());
+        }
 
 
     }
