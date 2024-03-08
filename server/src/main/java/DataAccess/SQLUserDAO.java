@@ -36,7 +36,7 @@ public class SQLUserDAO implements UserDAO{
     @Override
     public void clearAccess() throws dataAccess.DataAccessException {
         try (var conn = DatabaseManager.getConnection()){
-            try (var preparedStatement = conn.prepareStatement("DELETE FROM authDAO")) {
+            try (var preparedStatement = conn.prepareStatement("DELETE FROM userDAO")) {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException | dataAccess.DataAccessException e) {
@@ -76,9 +76,14 @@ public class SQLUserDAO implements UserDAO{
      */
     @Override
     public void createUser(String username, String email, String password) throws IncorrectException, DataAccessException {
-        if (!(isValid(username, "username") && isValid(email, "email") && isValid(password, "password"))) {
-            throw new IncorrectException("user's info does not meet required String format.");
+        if ((isValid(username, "username"))) {
+            if ((isValid(email, "email"))) {
+                if ((isValid(password, "email"))) {
+                    throw new IncorrectException("user's info does not meet required String format.");
+                }
+            }
         }
+
         UserData newUser = getUser(username);
         try (var conn = DatabaseManager.getConnection()){
             try (var preparedStatement = conn.prepareStatement(
@@ -132,10 +137,12 @@ public class SQLUserDAO implements UserDAO{
         if (type.equals("username") || type.equals("password")){
             pattern = Pattern.compile(USERNAME_PATTERN);
             matcher = pattern.matcher(input);
+            System.out.println("username/password: " + (matcher.matches()));
             return matcher.matches();
         } else if (type.equals("email")) {
             pattern = Pattern.compile(EMAIL_PATTERN);
             matcher = pattern.matcher(input);
+            System.out.println("email: " + (matcher.matches()));
             return matcher.matches();
         }
         return false;
