@@ -8,9 +8,9 @@ public class JoinGameService {
     private AuthDAO authDAO;
     private GameDAO gameDAO;
 
-    public JoinGameService(AuthDAO authInput, GameDAO gameDAO) {
+    public JoinGameService(AuthDAO authInput, GameDAO gameInput) {
         this.authDAO = authInput;
-        this.gameDAO = gameDAO;
+        this.gameDAO = gameInput;
     }
 
     public void joinGame(String authToken, String color, int gameID)

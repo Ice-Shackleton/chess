@@ -62,13 +62,14 @@ public class SQLAuthDAO implements AuthDAO {
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()){
-            try (var preparedStatement = conn.prepareStatement("SELECT authToken FROM authDAO WHERE authToken=?")) {
+            try (var preparedStatement = conn.prepareStatement("SELECT * FROM authDAO WHERE authToken = ?")) {
                 preparedStatement.setString(1, authToken);
-                String token = String.valueOf(preparedStatement.executeUpdate());
-                var secondStatement = conn.prepareStatement("SELECT username FROM authDAO WHERE authToken=?");
-                secondStatement.setString(1, authToken);
-                String username = String.valueOf(secondStatement.executeUpdate());
-                return new AuthData(authToken, username);
+                ResultSet token = preparedStatement.executeQuery();
+                if (token.next()){
+                    return new AuthData(authToken, token.getString("username"));
+                }
+                return null;
+
             }
         } catch (SQLException | DataAccessException e) {
             throw new DataAccessException(e.getMessage());
@@ -78,7 +79,7 @@ public class SQLAuthDAO implements AuthDAO {
     @Override
     public void deleteAuth(String authToken) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()){
-            try (var preparedStatement = conn.prepareStatement("DELETE authToken FROM authDAO WHERE authToken=?")) {
+            try (var preparedStatement = conn.prepareStatement("DELETE FROM authDAO WHERE authToken=?")) {
                 preparedStatement.setString(1, authToken);
                 preparedStatement.executeUpdate();
             }

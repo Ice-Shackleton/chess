@@ -19,7 +19,12 @@ public class LoginService {
     }
 
     public String login(String username, String password) throws DataAccessException, IncorrectException {
-        UserData user = this.userDAO.getUser(username);
+        UserData user;
+        try {
+            user = this.userDAO.getUser(username);
+        } catch (DataAccessException e) {
+            throw new DataAccessException("your command has broken the database, congratulations.");
+        }
         if (user == null){
             throw new DataAccessException("user does not exist.");
         }

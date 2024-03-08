@@ -21,16 +21,17 @@ public class Server {
 
 
 
-        UserDAO userDAO = new RAMUserDAO();
+        UserDAO userDAO;
         GameDAO gameDAO = new RAMGameDAO();
         AuthDAO authDAO;
         try {
             ChessDatabaseManager.chessDatabase();
             authDAO = new SQLAuthDAO();
-            // userDAO
+            userDAO = new SQLUserDAO();
         } catch (dataAccess.DataAccessException e) {
             System.out.println("database failed to start, you dummy.");
             authDAO = new RAMAuthDAO();
+            userDAO = new RAMUserDAO();
         }
 
         ClearService clearService = new ClearService(userDAO, gameDAO, authDAO);

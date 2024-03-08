@@ -1,6 +1,7 @@
 package HandlerFiles;
 
 import DataAccess.BadAccessException;
+import DataAccess.IncorrectException;
 import Services.RegisterService;
 import com.google.gson.Gson;
 import model.Message;
@@ -27,6 +28,9 @@ public class RegisterHandler {
         } catch (BadAccessException noInfo){
             q.status(400);
             return new Gson().toJson(new Message("Error: bad request"));
+        } catch (IncorrectException badFormatting) {
+            q.status(500);
+            return new Gson().toJson(new Message("Error: user did not format username or password with correct characters"));
         }
         q.status(200);
         return new Gson().toJson(new RegisterMessage(newRegister.username(), temp));

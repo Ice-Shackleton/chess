@@ -1,9 +1,6 @@
 package Services;
 
-import DataAccess.AuthDAO;
-import DataAccess.BadAccessException;
-import DataAccess.GameDAO;
-import DataAccess.UserDAO;
+import DataAccess.*;
 import model.AuthData;
 import model.UserData;
 
@@ -17,20 +14,27 @@ public class RegisterService {
         this.authDAO = authDAO;
     }
 
-    public String register(String username, String email, String password) throws dataAccess.DataAccessException, BadAccessException {
-
-        UserData newUser = this.userDAO.getUser(username);
+    public String register(String username, String email, String password) throws dataAccess.DataAccessException, BadAccessException, IncorrectException {
+        UserData newUser;
+        try {
+            newUser = this.userDAO.getUser(username);
+        } catch (dataAccess.DataAccessException e) {
+            throw new dataAccess.DataAccessException("This user probably doesn't exist.");
+        }
         if (newUser != null) {
             throw new dataAccess.DataAccessException("Tried to make a user with an already extant username.");
         }
         if(email == null || password == null){
             throw new BadAccessException("User did not provide specified fields.");
         }
-        this.userDAO.createUser(username, email, password);
+
         try {
+            this.userDAO.createUser(username, email, password);
             return this.authDAO.createAuth(username);
         } catch (dataAccess.DataAccessException e){
             throw new dataAccess.DataAccessException("you've done something very wrong to see this.");
+        } catch (IncorrectException e) {
+            throw new IncorrectException("user provided an invalid formatting of username/password");
         }
     }
 }
