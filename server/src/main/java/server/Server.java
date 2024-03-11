@@ -19,17 +19,17 @@ public class Server {
         Spark.staticFiles.location("web");
         // Register your endpoints and handle exceptions here.
 
-
-
         UserDAO userDAO;
-        GameDAO gameDAO = new RAMGameDAO();
+        GameDAO gameDAO;
         AuthDAO authDAO;
         try {
             ChessDatabaseManager.chessDatabase();
+            gameDAO = new SQLGameDAO();
             authDAO = new SQLAuthDAO();
             userDAO = new SQLUserDAO();
         } catch (dataAccess.DataAccessException e) {
             System.out.println("database failed to start, you dummy.");
+            gameDAO = new RAMGameDAO();
             authDAO = new RAMAuthDAO();
             userDAO = new RAMUserDAO();
         }
