@@ -28,18 +28,11 @@ public class ListGamesHandler {
         }
         q.status(200);
         if (gameStuff == null){
-            return new Gson().toJson(new GameRecord(new ArrayList<GameInfo>()));
+            return new Gson().toJson(new GameRecord(new ArrayList<GameData>()));
         }
-        ArrayList<GameInfo> games = new ArrayList<>();
-        for (int i=0; i < gameStuff.size(); i++){
-            GameData single = (GameData) gameStuff.get(i);
-            games.add(new GameInfo(single.gameID(), single.whiteUsername(), single.blackUsername(),
-                    single.game().getGameName()));
-        }
-        return new Gson().toJson(new GameRecord(games));
+        return new Gson().toJson(new GameRecord(gameStuff));
     }
 }
 
-record GameInfo(int gameID, String whiteUsername, String blackUsername, String gameName){}
-record GameRecord(ArrayList<GameInfo> games){}
+record GameRecord(ArrayList<GameData> games){}
 

@@ -27,17 +27,20 @@ public class JoinGameService {
         if (color != null && (!(color.equals("WHITE")) && !(color.equals("BLACK")))) {
             throw new BadAccessException("user put in an invalid color");
         }
-        if(token == null){
+        if (token == null) {
             throw new dataAccess.DataAccessException("user entered invalid authToken");
         }
         String username = token.username();
         try {
-            if(this.gameDAO.colorOccupied(color, gameID)){
+            if (this.gameDAO.colorOccupied(color, gameID)) {
                 throw new IncorrectException("user attempted to join an already occupied spot.");
             }
         } catch (SQLException | IncorrectException e) {
             throw new IncorrectException(e.getMessage());
+        } catch (BadAccessException e) {
+            throw new BadAccessException(e.getMessage());
         }
+
 
         boolean testCase = this.gameDAO.joinGame(color, gameID, username);
         if (!testCase) {

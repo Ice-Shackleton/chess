@@ -7,4 +7,5 @@ public record GameData(
         int gameID,
         String whiteUsername,
         String blackUsername,
-        ChessGame game) {}
+        ChessGame game,
+        String gameName) {}

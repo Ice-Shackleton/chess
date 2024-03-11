@@ -8,26 +8,35 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class UnitTests {
 
-    private UserDAO userDAO;
-    private GameDAO gameDAO;
-    private AuthDAO authDAO;
+    private static UserDAO userDAO;
+    private static GameDAO gameDAO;
+    private static AuthDAO authDAO;
 
 
-    @BeforeEach
-    public void setup() throws dataAccess.DataAccessException {
+    @BeforeAll
+    public static void setup() throws dataAccess.DataAccessException {
+        ChessDatabaseManager.chessDatabase();
         authDAO = new SQLAuthDAO();
         gameDAO = new SQLGameDAO();
         userDAO = new SQLUserDAO();
     }
 
-    @AfterEach
-    public void tearDown() {
+    @BeforeEach
+    public void initialize() throws dataAccess.DataAccessException {
+        authDAO.clearAccess();
+        userDAO.clearAccess();
+        gameDAO.clearAccess();
+    }
 
+    @AfterEach
+    public void tearDown() throws dataAccess.DataAccessException {
+        authDAO.clearAccess();
+        gameDAO.clearAccess();
+        userDAO.clearAccess();
     }
 
     @Test
-    public void testClear(){
-
-        //assertDoesNotThrow(() -> clearService. );
+    public void testAuthDAOClear() {
+        assertDoesNotThrow(()-> authDAO.clearAccess(), "clearing the auth table threw an error.");
     }
 }

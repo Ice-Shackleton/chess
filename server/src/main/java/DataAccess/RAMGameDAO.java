@@ -68,7 +68,7 @@ public class RAMGameDAO implements GameDAO{
     public int createGame(String gameName) {
         int gameID = gameIDGenerator+1;
         gameIDGenerator +=1;
-        GameData newGame = new GameData(gameID, null, null, new ChessGame());
+        GameData newGame = new GameData(gameID, null, null, new ChessGame(), gameName);
         this.gameData.put(gameID, newGame);
         return gameID;
     }
@@ -104,12 +104,12 @@ public class RAMGameDAO implements GameDAO{
                 ChessGame game = this.gameData.get(gameID).game();
                 if (color.equals("WHITE")) {
                     String blackUser = this.gameData.get(gameID).blackUsername();
-                    GameData newColor = new GameData(gameID, username, blackUser, game);
+                    GameData newColor = new GameData(gameID, username, blackUser, game, game.getGameName());
                     this.gameData.put(gameID, newColor);
                 }
                 if (color.equals("BLACK")) {
                     String whiteUser = this.gameData.get(gameID).whiteUsername();
-                    GameData newColor = new GameData(gameID, whiteUser, username, game);
+                    GameData newColor = new GameData(gameID, whiteUser, username, game, game.getGameName());
                     this.gameData.put(gameID, newColor);
                 }
 

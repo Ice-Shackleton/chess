@@ -75,22 +75,14 @@ public class SQLUserDAO implements UserDAO{
      * @param password
      */
     @Override
-    public void createUser(String username, String email, String password) throws IncorrectException, DataAccessException {
-        if ((isValid(username, "username"))) {
-            if ((isValid(email, "email"))) {
-                if ((isValid(password, "email"))) {
-                    throw new IncorrectException("user's info does not meet required String format.");
-                }
-            }
-        }
-
+    public void createUser(String username, String email, String password) throws DataAccessException {
         UserData newUser = getUser(username);
         try (var conn = DatabaseManager.getConnection()){
             try (var preparedStatement = conn.prepareStatement(
                     "INSERT INTO userDAO (username, password, email) VALUES(?, ?, ?)")) {
 
-                preparedStatement.setString(1, sanitize(username));
-                preparedStatement.setString(2, sanitize(password));
+                preparedStatement.setString(1, username);
+                preparedStatement.setString(2, password);
                 preparedStatement.setString(3, email);
 
                 preparedStatement.executeUpdate();

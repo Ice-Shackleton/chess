@@ -13,7 +13,7 @@ public interface GameDAO {
 
     public ArrayList<String> getObservers(int gameID) throws dataAccess.DataAccessException;
 
-    public boolean colorOccupied(String color, int gameID) throws dataAccess.DataAccessException, SQLException;
+    public boolean colorOccupied(String color, int gameID) throws dataAccess.DataAccessException, SQLException, BadAccessException;
 
     public int createGame(String gameName) throws dataAccess.DataAccessException;
 

@@ -19,12 +19,12 @@ public class SQLGameDAO implements GameDAO {
                     """
                             CREATE TABLE  IF NOT EXISTS gameDAO (
                             gameID INT NOT NULL,
-                            whiteUsername VARCHAR(255) NOT NULL,
-                            blackUsername VARCHAR(255) NOT NULL,
+                            whiteUsername VARCHAR(255) DEFAULT NULL,
+                            blackUsername VARCHAR(255) DEFAULT NULL,
                             gameName VARCHAR(255) NOT NULL,
                             chessGame longtext NOT NULL,
-                            observers longtext NOT NULL,
-                            PRIMARY KEY (authToken) 
+                            observers longtext DEFAULT NULL,
+                            PRIMARY KEY (gameID)
                             )""")) {
                 preparedStatement.executeUpdate();
 
@@ -55,7 +55,7 @@ public class SQLGameDAO implements GameDAO {
                     ChessGame thisGame = new Gson().fromJson(games.getString("chessGame"), ChessGame.class);
                     int gameID = Integer.parseInt(games.getString("gameID"));
                     thisList.add(new GameData(gameID, games.getString("whiteUsername"),
-                            games.getString("blackUsername"), thisGame));
+                            games.getString("blackUsername"), thisGame, games.getString("gameName")));
                 }
                 return thisList;
             }
@@ -82,25 +82,30 @@ public class SQLGameDAO implements GameDAO {
     }
 
     @Override
-    public boolean colorOccupied(String color, int gameID) throws dataAccess.DataAccessException {
+    public boolean colorOccupied(String color, int gameID) throws dataAccess.DataAccessException, BadAccessException {
         if(color == null){
             return false;
         }
         ResultSet games;
         try (var conn = DatabaseManager.getConnection()){
             try (var preparedStatement = conn.prepareStatement("SELECT * FROM gameDAO WHERE gameID = ?")) {
+                preparedStatement.setString(1, Integer.toString(gameID));
                 games = preparedStatement.executeQuery();
-                games.next();
-                if(color.equals("WHITE")){
-                    return !(games.getString("whiteUsername").isEmpty());
+                if( games.next()){
+                    if (color.equals("WHITE")) {
+                        return games.getString("whiteUsername") != null;
+                    }
+                    if (color.equals("BLACK")) {
+                        return (games.getString("blackUsername") != null);
+                    }
+                    return true;
                 }
-                if(color.equals("BLACK")){
-                    return !(games.getString("blackUsername").isEmpty());
-                }
-                return true;
+                throw new BadAccessException("User attempted to use a gameID that does not exist.");
             }
-        } catch (SQLException | dataAccess.DataAccessException e) {
+        } catch (SQLException | DataAccessException e) {
             throw new dataAccess.DataAccessException(e.getMessage());
+        } catch (BadAccessException e) {
+            throw new BadAccessException(e.getMessage());
         }
     }
 
@@ -109,24 +114,20 @@ public class SQLGameDAO implements GameDAO {
         int gameID = gameIDGenerator+1;
         gameIDGenerator +=1;
         ChessGame thisGame = new ChessGame();
-        ArrayList<String> observers = new ArrayList<>();
         try (var conn = DatabaseManager.getConnection()){
             try (var preparedStatement = conn.prepareStatement(
-                    "INSERT INTO gameDAO (gameID, whiteUsername, blackUsername, gameName, chessGame, observers)" +
-                            " VALUES(?, ?, ?, ?, ?, ?)")) {
+                    "INSERT INTO gameDAO (gameID, gameName, chessGame)" +
+                            " VALUES(?, ?, ?)")) {
 
                 preparedStatement.setString(1, Integer.toString(gameID));
-                preparedStatement.setString(2, null);
-                preparedStatement.setString(3, null);
-                preparedStatement.setString(4, gameName);
-                preparedStatement.setString(5, new Gson().toJson(thisGame, ChessGame.class));
-                preparedStatement.setString(6, new Gson().toJson(observers, ArrayList.class));
-
+                preparedStatement.setString(2, gameName);
+                preparedStatement.setString(3, new Gson().toJson(thisGame, ChessGame.class));
                 preparedStatement.executeUpdate();
 
                 return gameID;
             }
         } catch (SQLException | DataAccessException e) {
+            gameIDGenerator-=1;
             throw new DataAccessException(e.getMessage());
         }
     }
@@ -142,12 +143,14 @@ public class SQLGameDAO implements GameDAO {
                     //First, we need to handle the color.
                     java.sql.PreparedStatement newStatement;
                     if (color == null){
+                        /*
                         ArrayList<String> observers = new Gson().fromJson(games.getString("observers"), ArrayList.class);
                         observers.add(username);
                         newStatement = conn.prepareStatement("UPDATE gameDAO SET observers = ? WHERE gameID = ?");
                         newStatement.setString(1, new Gson().toJson(observers, ArrayList.class));
                         newStatement.setString(2, Integer.toString(gameID));
                         newStatement.executeUpdate();
+                        */
                         return true;
 
                     } else {
@@ -173,6 +176,7 @@ public class SQLGameDAO implements GameDAO {
                 }
 
                 return false;
+
             }
         } catch (SQLException | dataAccess.DataAccessException e) {
             throw new dataAccess.DataAccessException(e.getMessage());

@@ -33,8 +33,6 @@ public class RegisterService {
             return this.authDAO.createAuth(username);
         } catch (dataAccess.DataAccessException e){
             throw new dataAccess.DataAccessException("you've done something very wrong to see this.");
-        } catch (IncorrectException e) {
-            throw new IncorrectException("user provided an invalid formatting of username/password");
         }
     }
 }
