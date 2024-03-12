@@ -1,6 +1,6 @@
 package Services;
 
-import DataAccess.*;
+import dataAccess.*;
 import model.AuthData;
 
 import java.sql.SQLException;

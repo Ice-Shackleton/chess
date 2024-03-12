@@ -1,7 +1,7 @@
 package HandlerFiles;
 
-import DataAccess.BadAccessException;
-import DataAccess.IncorrectException;
+import dataAccess.BadAccessException;
+import dataAccess.IncorrectException;
 import Services.RegisterService;
 import com.google.gson.Gson;
 import model.Message;

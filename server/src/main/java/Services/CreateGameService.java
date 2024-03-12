@@ -1,11 +1,10 @@
 package Services;
 
-import DataAccess.AuthDAO;
-import DataAccess.BadAccessException;
-import DataAccess.GameDAO;
+import dataAccess.AuthDAO;
+import dataAccess.BadAccessException;
+import dataAccess.GameDAO;
 import dataAccess.DataAccessException;
 import model.AuthData;
-import model.GameData;
 
 public class CreateGameService {
 

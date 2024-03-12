@@ -1,12 +1,11 @@
 package Services;
 
-import DataAccess.AuthDAO;
-import DataAccess.GameDAO;
+import dataAccess.AuthDAO;
+import dataAccess.GameDAO;
 import model.AuthData;
 import model.GameData;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ListGameService {
 

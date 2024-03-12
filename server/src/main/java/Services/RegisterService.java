@@ -1,7 +1,6 @@
 package Services;
 
-import DataAccess.*;
-import model.AuthData;
+import dataAccess.*;
 import model.UserData;
 
 public class RegisterService {

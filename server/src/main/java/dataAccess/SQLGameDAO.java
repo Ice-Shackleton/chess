@@ -1,8 +1,7 @@
-package DataAccess;
+package dataAccess;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import dataAccess.DataAccessException;
 import model.GameData;
 
 import java.sql.ResultSet;
@@ -157,17 +156,25 @@ public class SQLGameDAO implements GameDAO {
                         //Now, we attempt to insert the username into the game and update the data.
                         ChessGame game = new Gson().fromJson(games.getString("chessGame"), ChessGame.class);
                         if (color.equals("WHITE")){
-                            newStatement = conn.prepareStatement("UPDATE gameDAO SET whiteUsername = ? WHERE gameID = ?");
-                            newStatement.setString(1, username);
-                            newStatement.setString(2, Integer.toString(gameID));
-                            newStatement.executeUpdate();
-                            return true;
+                            if (!colorOccupied(color, gameID)) {
+                                newStatement = conn.prepareStatement("UPDATE gameDAO SET whiteUsername = ? WHERE gameID = ?");
+                                newStatement.setString(1, username);
+                                newStatement.setString(2, Integer.toString(gameID));
+                                newStatement.executeUpdate();
+                                return true;
+                            } else {
+                                return false;
+                            }
                         } else if (color.equals("BLACK")) {
-                            newStatement = conn.prepareStatement("UPDATE gameDAO SET blackUsername = ? WHERE gameID = ?");
-                            newStatement.setString(1, username);
-                            newStatement.setString(2, Integer.toString(gameID));
-                            newStatement.executeUpdate();
-                            return true;
+                            if (!colorOccupied(color, gameID)) {
+                                newStatement = conn.prepareStatement("UPDATE gameDAO SET blackUsername = ? WHERE gameID = ?");
+                                newStatement.setString(1, username);
+                                newStatement.setString(2, Integer.toString(gameID));
+                                newStatement.executeUpdate();
+                                return true;
+                            } else {
+                                return false;
+                            }
                         } else {
                             throw new DataAccessException("user entered something that was neither color");
                         }
@@ -178,7 +185,7 @@ public class SQLGameDAO implements GameDAO {
                 return false;
 
             }
-        } catch (SQLException | dataAccess.DataAccessException e) {
+        } catch (SQLException | dataAccess.DataAccessException | BadAccessException e) {
             throw new dataAccess.DataAccessException(e.getMessage());
         }
     }

@@ -1,6 +1,6 @@
 package HandlerFiles;
 
-import DataAccess.IncorrectException;
+import dataAccess.IncorrectException;
 import Services.LoginService;
 import com.google.gson.Gson;
 import model.Message;

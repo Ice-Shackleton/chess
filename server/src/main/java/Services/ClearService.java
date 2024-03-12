@@ -1,8 +1,8 @@
 package Services;
 
-import DataAccess.AuthDAO;
-import DataAccess.GameDAO;
-import DataAccess.UserDAO;
+import dataAccess.AuthDAO;
+import dataAccess.GameDAO;
+import dataAccess.UserDAO;
 
 public class ClearService {
 

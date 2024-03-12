@@ -1,4 +1,4 @@
-package DataAccess;
+package dataAccess;
 
 public class ChessDatabaseManager extends DatabaseManager{
 

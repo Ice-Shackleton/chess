@@ -1,6 +1,6 @@
 package HandlerFiles;
 
-import DataAccess.BadAccessException;
+import dataAccess.BadAccessException;
 import Services.CreateGameService;
 import com.google.gson.Gson;
 import model.Message;

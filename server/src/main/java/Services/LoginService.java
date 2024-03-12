@@ -1,11 +1,9 @@
 package Services;
 
-import DataAccess.AuthDAO;
-import DataAccess.GameDAO;
-import DataAccess.IncorrectException;
-import DataAccess.UserDAO;
+import dataAccess.AuthDAO;
+import dataAccess.IncorrectException;
+import dataAccess.UserDAO;
 import dataAccess.DataAccessException;
-import model.AuthData;
 import model.UserData;
 
 public class LoginService {

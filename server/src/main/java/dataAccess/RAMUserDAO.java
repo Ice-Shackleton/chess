@@ -1,9 +1,8 @@
-package DataAccess;
+package dataAccess;
 
 import model.UserData;
 
 import java.util.HashMap;
-import java.util.Objects;
 
 public class RAMUserDAO implements UserDAO {
 
