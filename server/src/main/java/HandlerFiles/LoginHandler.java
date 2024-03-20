@@ -3,7 +3,7 @@ package HandlerFiles;
 import dataAccess.IncorrectException;
 import Services.LoginService;
 import com.google.gson.Gson;
-import model.Message;
+import model.*;
 import spark.Request;
 import spark.Response;
 
@@ -31,5 +31,3 @@ public class LoginHandler {
     }
 }
 
-record LoginData(String username, String password){}
-record LoginMessage(String username, String authToken){}

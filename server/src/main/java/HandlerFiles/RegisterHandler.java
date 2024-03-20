@@ -5,6 +5,7 @@ import dataAccess.IncorrectException;
 import Services.RegisterService;
 import com.google.gson.Gson;
 import model.Message;
+import model.RegisterMessage;
 import model.UserData;
 import spark.Request;
 import spark.Response;
@@ -37,5 +38,3 @@ public class RegisterHandler {
     }
 
 }
-
-record RegisterMessage(String username, String authToken){}

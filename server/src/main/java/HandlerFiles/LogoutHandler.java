@@ -28,6 +28,3 @@ public class LogoutHandler {
         return new Gson().toJson(new Message("{}"));
     }
 }
-
-record AuthStorage(String authorization){}
-
