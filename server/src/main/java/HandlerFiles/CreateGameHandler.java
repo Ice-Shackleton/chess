@@ -3,7 +3,7 @@ package HandlerFiles;
 import dataAccess.BadAccessException;
 import Services.CreateGameService;
 import com.google.gson.Gson;
-import model.Message;
+import model.*;
 import spark.Request;
 import spark.Response;
 
@@ -31,7 +31,3 @@ public class CreateGameHandler {
         return new Gson().toJson(new IdResponse(Integer.toString(gameID)));
     }
 }
-
-record GameName(String gameName){}
-
-record IdResponse(String gameID){}

@@ -48,6 +48,16 @@ public class ServerMain {
         return this.makeRequest("DELETE", path, null, AuthStorage.class, authToken);
     }
 
+    public GameRecord listGamesUser(String authToken) throws ResponseException {
+        var path = "/game";
+        return this.makeRequest("GET", path, null, GameRecord.class, authToken);
+    }
+
+    public IdResponse createGame(String authToken, String gameName) throws ResponseException {
+        var path = "/game";
+        return this.makeRequest("POST", path, new GameName(gameName), IdResponse.class, authToken);
+    }
+
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass,
                               String authToken) throws ResponseException {
@@ -55,8 +65,9 @@ public class ServerMain {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
-            http.setDoOutput(true);
-
+            if (!method.equals("GET")){
+                http.setDoOutput(true);
+            }
             if (authToken != null) {
                 http.addRequestProperty("authorization", authToken);
             }

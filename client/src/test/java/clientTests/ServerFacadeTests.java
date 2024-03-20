@@ -93,4 +93,18 @@ public class ServerFacadeTests {
         assertDoesNotThrow(()-> main.logoutUser(temp.authToken()));
     }
 
+    @Test
+    public void logoutNegative() throws ResponseException {
+        RegisterMessage temp = main.registerUser("validUser", "validEmail", "validPass");
+        LoginMessage newMessage = main.loginUser("validUser", "validPass");
+        assertThrows(ResponseException.class, ()-> main.logoutUser("aaaaaaaaaaaa"));
+    }
+
+    @Test
+    public void createGamePositive() throws ResponseException {
+        RegisterMessage temp = main.registerUser("validUser", "validEmail", "validPass");
+        LoginMessage newMessage = main.loginUser("validUser", "validPass");
+        assertDoesNotThrow(()-> main.createGame(newMessage.authToken(), "gameName1"));
+    }
+
 }

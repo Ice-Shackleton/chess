@@ -2,7 +2,7 @@ package HandlerFiles;
 
 import Services.ListGameService;
 import com.google.gson.Gson;
-import model.GameData;
+import model.*;
 import model.Message;
 import spark.Request;
 import spark.Response;
@@ -34,5 +34,4 @@ public class ListGamesHandler {
     }
 }
 
-record GameRecord(ArrayList<GameData> games){}
 
