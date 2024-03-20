@@ -1,10 +1,7 @@
 package clientTests;
 
 import exception.ResponseException;
-import model.AuthStorage;
-import model.LoginMessage;
-import model.RegisterMessage;
-import model.UserData;
+import model.*;
 import org.junit.jupiter.api.*;
 import server.Server;
 import serverFacade.ServerMain;
@@ -105,6 +102,23 @@ public class ServerFacadeTests {
         RegisterMessage temp = main.registerUser("validUser", "validEmail", "validPass");
         LoginMessage newMessage = main.loginUser("validUser", "validPass");
         assertDoesNotThrow(()-> main.createGame(newMessage.authToken(), "gameName1"));
+    }
+
+    @Test
+    public void createGameNegative() throws ResponseException {
+        RegisterMessage temp = main.registerUser("validUser", "validEmail", "validPass");
+        LoginMessage newMessage = main.loginUser("validUser", "validPass");
+        assertThrows(ResponseException.class, ()-> main.createGame("newMessage.authToken()", "gameName1"));
+    }
+
+    @Test
+    public void listGamesPositive() throws ResponseException {
+        RegisterMessage temp = main.registerUser("validUser", "validEmail", "validPass");
+        LoginMessage newMessage = main.loginUser("validUser", "validPass");
+        main.createGame(newMessage.authToken(), "gameName1");
+        assertDoesNotThrow(()-> main.listGamesUser(newMessage.authToken()));
+        GameRecord gameList = main.listGamesUser(newMessage.authToken());
+        assertNotNull(gameList);
     }
 
 }
