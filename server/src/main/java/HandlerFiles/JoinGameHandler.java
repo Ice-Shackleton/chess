@@ -4,7 +4,7 @@ import dataAccess.BadAccessException;
 import dataAccess.IncorrectException;
 import Services.JoinGameService;
 import com.google.gson.Gson;
-import model.Message;
+import model.*;
 import spark.Request;
 import spark.Response;
 
@@ -37,4 +37,3 @@ public class JoinGameHandler {
     }
 }
 
-record ColorStorage(String playerColor, int gameID){}

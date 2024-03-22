@@ -58,14 +58,29 @@ public class ServerMain {
         return this.makeRequest("POST", path, new GameName(gameName), IdResponse.class, authToken);
     }
 
+    public Message joinGameUser(String authToken, String playerColor, int gameID) throws ResponseException {
+        var path = "/game";
+        return this.makeRequest("PUT", path, new ColorStorage(playerColor, gameID), Message.class, authToken);
+    }
 
+    /**
+     * If I could explain how this works, I would; as I can't, all you get is the parameters.
+     * @param method The HTTP method used to interact with the database, largely a Spark thing.
+     * @param path The HTTP path used to find the specific function through spark, I think.
+     * @param request the object the server function will extract data from, pulled from the shared Model folder.
+     * @param responseClass the object Class which will be returned from the server.
+     * @param authToken often null, but is used to authenticate a user.
+     * @return
+     * @param <T>
+     * @throws ResponseException
+     */
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass,
                               String authToken) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
-            if (!method.equals("GET")){
+            if (!(method.equals("GET") || method.equals("DELETE"))){
                 http.setDoOutput(true);
             }
             if (authToken != null) {
