@@ -137,29 +137,29 @@ public class ServerFacadeTests {
         LoginMessage newMessage2 = main.loginUser("validUser2", "validPass");
         RegisterMessage temp3 = main.registerUser("validUser3", "validEmail", "validPass");
         LoginMessage newMessage3 = main.loginUser("validUser3", "validPass");
-        main.createGame(newMessage.authToken(), "gameName1");
+        IdResponse gameID = main.createGame(newMessage.authToken(), "gameName1");
         //First, we join a game as an observer.
-        assertDoesNotThrow(()-> main.joinGameUser(newMessage.authToken(), null, 1));
+        assertDoesNotThrow(()-> main.joinGameUser(newMessage.authToken(), null, Integer.parseInt(gameID.gameID())));
         //Then, we join as colors.
-        assertDoesNotThrow(()-> main.joinGameUser(newMessage2.authToken(), "WHITE", 1));
-        assertDoesNotThrow(()-> main.joinGameUser(newMessage3.authToken(), "BLACK", 1));
+        assertDoesNotThrow(()-> main.joinGameUser(newMessage2.authToken(), "WHITE", Integer.parseInt(gameID.gameID())));
+        assertDoesNotThrow(()-> main.joinGameUser(newMessage3.authToken(), "BLACK", Integer.parseInt(gameID.gameID())));
     }
 
     @Test
     public void joinGameNegative() throws ResponseException {
         RegisterMessage temp = main.registerUser("validUser1", "validEmail", "validPass");
         LoginMessage newMessage = main.loginUser("validUser1", "validPass");
-        main.createGame(newMessage.authToken(), "gameName1");
+        IdResponse gameID = main.createGame(newMessage.authToken(), "gameName1");
         //Let's attempt to join with a bad Id.
-        assertThrows(ResponseException.class, ()-> main.joinGameUser(newMessage.authToken(), null, 4));
+        assertThrows(ResponseException.class, ()-> main.joinGameUser(newMessage.authToken(), null, 99999));
         //Attempting to join with a bad authToken.
-        assertThrows(ResponseException.class, ()-> main.joinGameUser("newMessage.authToken()", null, 1));
+        assertThrows(ResponseException.class, ()-> main.joinGameUser("newMessage.authToken()", null, Integer.parseInt(gameID.gameID())));
 
         //Attempting to join an occupied spot.
         RegisterMessage temp2 = main.registerUser("validUser2", "validEmail", "validPass");
         LoginMessage newMessage2 = main.loginUser("validUser2", "validPass");
-        Message join = main.joinGameUser(newMessage2.authToken(), "WHITE", 1);
-        assertThrows(ResponseException.class, ()-> main.joinGameUser(newMessage.authToken(), "WHITE", 1));
+        Message join = main.joinGameUser(newMessage2.authToken(), "WHITE", Integer.parseInt(gameID.gameID()));
+        assertThrows(ResponseException.class, ()-> main.joinGameUser(newMessage.authToken(), "WHITE", Integer.parseInt(gameID.gameID())));
     }
 
 }
