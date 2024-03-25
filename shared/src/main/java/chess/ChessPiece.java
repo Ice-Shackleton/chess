@@ -77,4 +77,17 @@ public class ChessPiece {
     public int hashCode() {
         return Objects.hash(color, type);
     }
+
+    @Override
+    public String toString() {
+        return switch (this.type) {
+            case PieceType.PAWN -> "♙";
+            case PieceType.BISHOP -> "♗";
+            case PieceType.KNIGHT -> "♘";
+            case PieceType.QUEEN -> "♕";
+            case PieceType.ROOK -> "♖";
+            case PieceType.KING -> "♔";
+            case null, default -> "";
+        };
+    }
 }
