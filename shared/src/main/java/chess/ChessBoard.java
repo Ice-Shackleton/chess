@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Arrays;
+import static chess.EscapeSequences.*;
 
 
 /**
@@ -111,30 +112,6 @@ public class ChessBoard {
     }
 
     /**
-     * This overrides the usual toString method to print out the chess board.
-     * Ideally, it can be used to print out any board state.
-     * @return A stringbuilder.toString that will represent the current board state.
-     */
-    @Override
-    public String toString() {
-        StringBuilder state = new StringBuilder(200);
-        for (int i = 0; i < 8; i++) {
-            if (i !=0){ state.append("\n"); }
-
-            for (int j = 0; j < 8; j++) {
-                state.append("|");
-                ChessPiece input = this.board[i][j];
-                state.append("|");
-                state.append(pieceChar(input));
-
-                if (j == 7){ state.append("|"); }
-
-            }
-        }
-        return state.toString();
-    }
-
-    /**
      * A simple method that return the string character of the input {@link ChessPiece}.
      * White pieces will be capitalized, and black pieces will be lowercase.
      * @param piece A {@link ChessPiece}.
@@ -193,5 +170,94 @@ public class ChessBoard {
             }
         }
        return temp;
+    }
+
+
+    public String oppositePerspective() {
+        StringBuilder state = new StringBuilder(400);
+        boolean isWhite = true;
+        state.append(SET_TEXT_COLOR_WHITE + " A   B   C  D  E   F   G   H\n");
+        for (int i = 7; i > -1; i--) {
+            if (i != 7){ state.append("\n"); }
+            for (int j = 7; j >-1; j--) {
+
+                if ((i+j) % 2 != 0){
+                    isWhite = false;
+                    state.append(SET_BG_COLOR_WHITE);
+                } else {
+                    isWhite = true;
+                    state.append(SET_BG_COLOR_DARK_GREY);
+                }
+
+                ChessPiece input = this.board[i][j];
+
+                if (input != null) {
+                    state.append(" ");
+                    if (input.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                        state.append(SET_TEXT_COLOR_MAGENTA);
+                        state.append(input.toString());
+                    } else {
+                        state.append(SET_TEXT_COLOR_GREEN);
+                        state.append(input.toString());
+                    }
+                    state.append(" ");
+                } else {
+                    state.append(EMPTY);
+                }
+
+            }
+
+            state.append(SET_TEXT_COLOR_WHITE);
+            state.append(RESET_BG_COLOR);
+            state.append("  ");
+            state.append(8-i);
+
+        }
+        return state.toString();
+    }
+
+    /**
+     * This overrides the usual toString method to print out the chess board.
+     * Ideally, it can be used to print out any board state.
+     * @return A stringbuilder.toString that will represent the current board state.
+     */
+    @Override
+    public String toString() {
+        StringBuilder state = new StringBuilder(400);
+        boolean isWhite = true;
+        state.append(SET_TEXT_COLOR_WHITE + " A   B   C  D  E   F   G   H\n");
+        for (int i = 0; i < 8; i++) {
+            if (i != 0){ state.append("\n"); }
+            for (int j = 0; j < 8; j++) {
+
+                if ((i + j) % 2 == 0){
+                    isWhite = false;
+                    state.append(SET_BG_COLOR_WHITE);
+                } else {
+                    isWhite = true;
+                    state.append(SET_BG_COLOR_DARK_GREY);
+                }
+
+                ChessPiece input = this.board[i][j];
+                if (input != null) {
+                    state.append(" ");
+                    if (input.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                        state.append(SET_TEXT_COLOR_MAGENTA);
+                        state.append(input.toString());
+                    } else {
+                        state.append(SET_TEXT_COLOR_GREEN);
+                        state.append(input.toString());
+                    }
+                    state.append(" ");
+                } else {
+                    state.append(EMPTY);
+                }
+            }
+            state.append(SET_TEXT_COLOR_WHITE);
+            state.append(RESET_BG_COLOR);
+            state.append("  ");
+            state.append(8-i);
+        }
+        return state.toString();
     }
 }

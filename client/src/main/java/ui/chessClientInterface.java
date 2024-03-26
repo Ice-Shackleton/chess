@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessBoard;
 import exception.ResponseException;
 import model.*;
 import serverFacade.ServerMain;
@@ -15,7 +16,7 @@ public class chessClientInterface {
     private final ServerMain serverFacade;
     private boolean loginStatus;
     private String authToken = "";
-    private HashMap<Integer, Integer> currentGameList = null;
+    private HashMap<Integer, GameData> currentGameList = null;
 
     public chessClientInterface(String url) {
 
@@ -50,7 +51,7 @@ public class chessClientInterface {
         if(this.loginStatus) {
             switch (input) {
                 case "logout" -> {
-                    AuthStorage temp = serverFacade.logoutUser(this.authToken);
+                    AuthStorage temp = this.serverFacade.logoutUser(this.authToken);
                     this.loginStatus = false;
                     return "logged out.";
                 }
@@ -65,24 +66,27 @@ public class chessClientInterface {
                             SET_TEXT_COLOR_LIGHT_GREY + " - to join an active game");
                     System.out.println(SET_TEXT_COLOR_MAGENTA + "  join as observer" +
                             SET_TEXT_COLOR_LIGHT_GREY + " - to observe an active game");
+                    System.out.println(SET_TEXT_COLOR_MAGENTA + "  display" +
+                            SET_TEXT_COLOR_LIGHT_GREY + " - to visualize a specific game");
                     return (SET_TEXT_COLOR_MAGENTA + "  help" +
                             SET_TEXT_COLOR_LIGHT_GREY + " - with possible commands");
                 }
                 case "create game" -> {
                     System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "\t[GAME_NAME] >>> ");
                     String gameName = lineReader.nextLine();
-                    IdResponse temp = serverFacade.createGame(this.authToken, gameName);
-                    return (SET_TEXT_COLOR_LIGHT_GREY + "game created successfully.");
+                    IdResponse temp = this.serverFacade.createGame(this.authToken, gameName);
+                    GameRecord games = this.serverFacade.listGamesUser(this.authToken);
+                    return "game created successfully.";
                 }
                 case "list games" -> {
-                    GameRecord games = serverFacade.listGamesUser(this.authToken);
+                    GameRecord games = this.serverFacade.listGamesUser(this.authToken);
                     this.currentGameList = new HashMap<>();
                     int i=1;
                     for (GameData game: games.games()){
                         System.out.print(SET_TEXT_COLOR_LIGHT_GREY + i + ". ");
                         System.out.print(SET_TEXT_COLOR_MAGENTA + game.gameName());
                         if (game.blackUsername() == null && game.whiteUsername() == null){
-                            System.out.print(SET_TEXT_COLOR_LIGHT_GREY + " currently has no players.");
+                            System.out.print(SET_TEXT_COLOR_LIGHT_GREY + " currently has no players.\n");
                         } else {
 
                             if (game.whiteUsername() == null){
@@ -93,14 +97,14 @@ public class chessClientInterface {
                             }
 
                             if (game.blackUsername() == null){
-                                System.out.print(SET_TEXT_COLOR_LIGHT_GREY + ", BLACK is unoccupied, " );
+                                System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "BLACK is unoccupied.\n");
                             } else {
-                                System.out.print(SET_TEXT_COLOR_LIGHT_GREY + ", BLACK is occupied by "
-                                        + game.blackUsername() + ", ");
+                                System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "BLACK is occupied by "
+                                        + game.blackUsername() + ".\n");
                             }
 
                         }
-                        this.currentGameList.put(i, game.gameID());
+                        this.currentGameList.put(i, game);
                         i++;
                     }
                     return "\nlist complete.";
@@ -113,9 +117,13 @@ public class chessClientInterface {
                     String gameID = lineReader.nextLine();
                     System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "\t[DESIRED_COLOR] >>> ");
                     String playerColor = lineReader.nextLine();
-                    Message temp = serverFacade.joinGameUser(this.authToken,
-                            playerColor.toUpperCase(), currentGameList.get(Integer.parseInt(gameID)));
-                    return SET_TEXT_COLOR_LIGHT_GREY + "game joined successfully.";
+                    Message temp = this.serverFacade.joinGameUser(this.authToken,
+                            playerColor.toUpperCase(), this.currentGameList.get(Integer.parseInt(gameID)).gameID());
+                    if (this.currentGameList == null) {
+                        return "game joined successfully.";
+                    }
+                    ChessBoard board = this.currentGameList.get(Integer.parseInt(gameID)).game().getBoard();
+                    return board.toString() + "\n\n" + board.oppositePerspective();
                 }
                 case "join as observer" -> {
                     if(this.currentGameList == null){
@@ -123,9 +131,13 @@ public class chessClientInterface {
                     }
                     System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "\t[GAME_ID] >>> ");
                     String gameID = lineReader.nextLine();
-                    Message temp = serverFacade.joinGameUser(this.authToken,
-                            null, currentGameList.get(Integer.parseInt(gameID)));
-                    return SET_TEXT_COLOR_LIGHT_GREY + "game observed successfully.";
+                    Message temp = this.serverFacade.joinGameUser(this.authToken,
+                            null, currentGameList.get(Integer.parseInt(gameID)).gameID());
+                    if (this.currentGameList == null) {
+                        return "game observed successfully.";
+                    }
+                    ChessBoard board = this.currentGameList.get(Integer.parseInt(gameID)).game().getBoard();
+                    return board.toString() + "\n\n" + board.oppositePerspective();
                 }
                 default -> {
                     return "invalid command.";
@@ -142,7 +154,7 @@ public class chessClientInterface {
                     String password = lineReader.nextLine();
                     System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "\t[EMAIL] >>> ");
                     String email = lineReader.nextLine();
-                    RegisterMessage temp = serverFacade.registerUser(username, email, password);
+                    RegisterMessage temp = this.serverFacade.registerUser(username, email, password);
                     this.loginStatus = true;
                     this.authToken = temp.authToken();
                     return "registered.";
@@ -152,7 +164,7 @@ public class chessClientInterface {
                     String username = lineReader.nextLine();
                     System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "\t[PASSWORD] >>> ");
                     String password = lineReader.nextLine();
-                    LoginMessage temp = serverFacade.loginUser(username, password);
+                    LoginMessage temp = this.serverFacade.loginUser(username, password);
                     this.loginStatus = true;
                     this.authToken = temp.authToken();
                     return "logged in successfully.";
@@ -181,4 +193,10 @@ public class chessClientInterface {
             System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "\n[LOGGED_OUT] >>> ");
         }
     }
+
+
+
+
+
+
 }
