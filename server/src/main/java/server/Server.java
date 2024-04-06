@@ -34,6 +34,9 @@ public class Server {
             userDAO = new RAMUserDAO();
         }
 
+        Spark.webSocket("/connect", WSServer.class);
+
+
         ClearService clearService = new ClearService(userDAO, gameDAO, authDAO);
         RegisterService registerService = new RegisterService(userDAO, authDAO);
         LoginService loginService = new LoginService(userDAO, authDAO);
@@ -66,4 +69,5 @@ public class Server {
         Spark.stop();
         Spark.awaitStop();
     }
+
 }

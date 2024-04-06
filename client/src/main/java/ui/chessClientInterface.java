@@ -5,9 +5,7 @@ import exception.ResponseException;
 import model.*;
 import serverFacade.ServerMain;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
@@ -109,6 +107,13 @@ public class chessClientInterface {
                     }
                     return "\nlist complete.";
                 }
+                /**
+                 * This method is smarter than it looks. In essence, when a user opens a client to join a game, it
+                 * will handle the logic as follows:
+                 * 1. Is the color slot of the game open? If yes, then perform the http request to add user to database.
+                 * If no, then http request is not sent.
+                 * 2. Is the user already in the appropriate color slot? If yes, then launch gameUI with a join message.
+                 */
                 case "join game" -> {
                     if(this.currentGameList == null){
                         return (SET_TEXT_COLOR_MAGENTA + "You need to list games first.");
@@ -122,6 +127,9 @@ public class chessClientInterface {
                     if (this.currentGameList == null) {
                         return "game joined successfully.";
                     }
+
+
+
                     ChessBoard board = this.currentGameList.get(Integer.parseInt(gameID)).game().getBoard();
                     return board.toString() + "\n\n" + board.oppositePerspective();
                 }

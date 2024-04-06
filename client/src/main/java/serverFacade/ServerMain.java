@@ -18,7 +18,7 @@ public class ServerMain {
     private final String serverUrl;
 
     public ServerMain(String url) {
-        serverUrl = url;
+        serverUrl = "http://" + url;
     }
 
 
