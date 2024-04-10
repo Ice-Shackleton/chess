@@ -14,7 +14,7 @@ public class LoadGameMessage extends ServerMessage{
     @Override
     public String toString() {
         return "LoadGameMessage{" +
-                "game=" + game.getGameName() +
+                "game=" + "null" +
                 ", serverMessageType=" + serverMessageType +
                 '}';
     }
