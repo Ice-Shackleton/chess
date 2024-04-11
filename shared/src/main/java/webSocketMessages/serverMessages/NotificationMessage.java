@@ -15,5 +15,5 @@ public class NotificationMessage extends ServerMessage {
                 '\'' + notification + '\'' +
                 '}';
     }
-    
+
 }

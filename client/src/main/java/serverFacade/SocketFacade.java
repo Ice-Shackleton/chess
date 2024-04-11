@@ -1,17 +1,17 @@
 package serverFacade;
 
 import com.google.gson.Gson;
-import webSocketMessages.SocketMessage;
 import webSocketMessages.serverMessages.LoadGameMessage;
 import webSocketMessages.serverMessages.ServerMessage;
 
 import javax.websocket.*;
 import java.net.URI;
+import static ui.EscapeSequences.*;
 
 public class SocketFacade extends Endpoint {
 
+    Gson gson = new Gson();
     public Session session;
-    private static final Gson gson = new Gson();
 
     public SocketFacade(String url) throws Exception {
         URI uri = new URI("ws://" + url + "/connect");
@@ -20,16 +20,7 @@ public class SocketFacade extends Endpoint {
 
         this.session.addMessageHandler(new MessageHandler.Whole<String>() {
             public void onMessage(String message) {
-                //when message is received, deserialize the object to get the type; use switch statement
-                //to deserialize for a second time and run command
-                System.out.println("Package received from server was as follows:");
-                ServerMessage response = gson.fromJson(message, ServerMessage.class);
-                if (response.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
-                    LoadGameMessage effect = gson.fromJson(message, LoadGameMessage.class);
-                    System.out.println(effect);
-                } else {
-                    System.out.println("Something has gone SERIOUSLY wrong, dude.");
-                }
+                evalPrint(message);
             }
         });
     }
@@ -42,4 +33,25 @@ public class SocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
 
     }
+
+    /**
+     * This method evaluates a websocket message and prints out its contents, based on the {@link webSocketMessages.serverMessages.ServerMessage}
+     * command type of the message.
+     * @param message a Json string.
+     */
+    public void evalPrint(String message) {
+        try {
+            ServerMessage response = gson.fromJson(message, ServerMessage.class);
+            if (response.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
+                LoadGameMessage effect = gson.fromJson(message, LoadGameMessage.class);
+                System.out.println("\n" + effect.game.getBoard().toString());
+                System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "[GAME_TIME] >>> ");
+            } else {
+                System.out.println("Something has gone SERIOUSLY wrong, dude.");
+            }
+        } catch (Exception e) {
+            System.out.println("\n" + SET_TEXT_COLOR_BLUE + e.getMessage());
+        }
+    }
+
 }

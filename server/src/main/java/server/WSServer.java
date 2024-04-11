@@ -1,39 +1,52 @@
 package server;
 
+import chess.ChessBoard;
+import chess.ChessGame;
 import com.google.gson.Gson;
+import dataAccess.AuthDAO;
+import dataAccess.GameDAO;
+import dataAccess.UserDAO;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import webSocketMessages.SocketMessage;
+import spark.Spark;
+import webSocketMessages.serverMessages.ErrorMessage;
 import webSocketMessages.serverMessages.LoadGameMessage;
 import webSocketMessages.serverMessages.ServerMessage;
-import webSocketMessages.userCommands.JoinPlayerMessage;
 import webSocketMessages.userCommands.UserGameCommand;
 
 @WebSocket
 public class WSServer {
 
-    private static final Gson gson = new Gson();
-    public WSServer() {
+    Gson gson = new Gson();
+    UserDAO userDAO;
+    GameDAO gameDAO;
+    AuthDAO authDAO;
+
+    //UserDAO userDAO, GameDAO gameDAO, AuthDAO authDAO
+    public WSServer(UserDAO userDAO, GameDAO gameDAO, AuthDAO authDAO) {
+
+        this.userDAO = userDAO;
+        this.gameDAO = gameDAO;
+        this.authDAO = authDAO;
+
     }
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws Exception {
-        UserGameCommand msg = gson.fromJson(message, UserGameCommand.class);
         try {
+            UserGameCommand msg = gson.fromJson(message, UserGameCommand.class);
             if (msg.getCommandType() == UserGameCommand.CommandType.JOIN_PLAYER) {
-                JoinPlayerMessage request = gson.fromJson(message, JoinPlayerMessage.class);
-                //this is where we do stuff
-                LoadGameMessage result = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, null);
-                session.getRemote().sendString(gson.toJson(result));
+                ChessGame game = new ChessGame();
+                LoadGameMessage response = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
+                session.getRemote().sendString(gson.toJson(response));
             } else {
-                throw new Exception("You fucking idiot");
+                throw new Exception("You idiot");
             }
+
         } catch (Exception e) {
-            SocketMessage error = new SocketMessage(e.getClass(), gson.toJson(e));
+            ErrorMessage error = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
             session.getRemote().sendString(gson.toJson(error));
         }
-        session.getRemote().sendString(message);
-
     }
 }

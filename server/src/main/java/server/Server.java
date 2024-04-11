@@ -34,7 +34,8 @@ public class Server {
             userDAO = new RAMUserDAO();
         }
 
-        Spark.webSocket("/connect", WSServer.class);
+        WSServer temp = new WSServer(userDAO, gameDAO, authDAO);
+        Spark.webSocket("/connect", temp);
 
 
         ClearService clearService = new ClearService(userDAO, gameDAO, authDAO);
