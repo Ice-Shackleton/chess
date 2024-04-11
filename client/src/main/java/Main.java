@@ -2,6 +2,7 @@ import chess.*;
 import com.google.gson.Gson;
 import serverFacade.SocketFacade;
 import ui.*;
+import webSocketMessages.userCommands.JoinObserverMessage;
 import webSocketMessages.userCommands.JoinPlayerMessage;
 
 public class Main {
@@ -11,7 +12,7 @@ public class Main {
 
         try {
             SocketFacade temp = new SocketFacade("localhost:" + 8080);
-            JoinPlayerMessage join = new JoinPlayerMessage("nonsense", 1, ChessGame.TeamColor.WHITE);
+            JoinObserverMessage join = new JoinObserverMessage("21149671-39ed-43d3-9a01-4b44723387d5", 1);
             temp.send(new Gson().toJson(join));
         } catch (Exception e) {
             System.out.println(e.getMessage());

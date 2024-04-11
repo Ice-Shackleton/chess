@@ -16,6 +16,7 @@ import spark.Spark;
 import webSocketMessages.serverMessages.ErrorMessage;
 import webSocketMessages.serverMessages.LoadGameMessage;
 import webSocketMessages.serverMessages.ServerMessage;
+import webSocketMessages.userCommands.JoinObserverMessage;
 import webSocketMessages.userCommands.JoinPlayerMessage;
 import webSocketMessages.userCommands.UserGameCommand;
 
@@ -42,6 +43,7 @@ public class WSServer {
     public void onMessage(Session session, String message) throws Exception {
         try {
             UserGameCommand msg = gson.fromJson(message, UserGameCommand.class);
+
             if (msg.getCommandType() == UserGameCommand.CommandType.JOIN_PLAYER) {
                 JoinPlayerMessage request = gson.fromJson(message, JoinPlayerMessage.class);
                 GameData game = null;
@@ -88,7 +90,36 @@ public class WSServer {
 
                 LoadGameMessage response = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game.game());
                 session.getRemote().sendString(gson.toJson(response));
-            //} else if (msg.getCommandType() == UserGameCommand.CommandType.JOIN_OBSERVER) {
+
+            } else if (msg.getCommandType() == UserGameCommand.CommandType.JOIN_OBSERVER) {
+                //this does much the same work as joinPlayer, but with much less verification.
+                //First, verifying the authToken.
+                JoinObserverMessage request = gson.fromJson(message, JoinObserverMessage.class);
+                GameData game = null;
+                try {
+                    AuthData token = this.authDAO.getAuth(request.getAuthString());
+                    if (token == null) {
+                        throw new dataAccess.DataAccessException("no such authToken exists");
+                    }
+                } catch (Exception e) {
+                    throw new Exception("invalid authToken provided.");
+                }
+                //now, verifying details about the game.
+                ArrayList<GameData> temp = gameDAO.getGameList();
+                int i = 0;
+                while (i < temp.size()) {
+                    if (temp.get(i).gameID() == request.gameId) {
+                        game = temp.get(i);
+                        break;
+                    }
+                    i++;
+                }
+                //verifying data is correct.
+                if (game == null) {
+                    throw new Exception("no game found");
+                }
+                LoadGameMessage response = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game.game());
+                session.getRemote().sendString(gson.toJson(response));
 
             } else {
                 throw new Exception("You idiot");

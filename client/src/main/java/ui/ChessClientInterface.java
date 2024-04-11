@@ -7,6 +7,7 @@ import exception.ResponseException;
 import model.*;
 import serverFacade.ServerMain;
 import serverFacade.SocketFacade;
+import webSocketMessages.userCommands.JoinObserverMessage;
 import webSocketMessages.userCommands.JoinPlayerMessage;
 
 import java.util.HashMap;
@@ -19,6 +20,8 @@ public class chessClientInterface {
     private final SocketFacade socketFacade;
     private boolean loginStatus;
     private boolean gameStatus;
+    //this next variables will help keep track of a user's current game.
+    private Integer currentGameLoaded;
     private String authToken = "";
     private HashMap<Integer, GameData> currentGameList = null;
     private Gson gson = new Gson();
@@ -28,6 +31,7 @@ public class chessClientInterface {
             this.socketFacade  = new SocketFacade(url);
             this.loginStatus = false;
             this.gameStatus = false;
+            this.currentGameLoaded = -1;
             Scanner scanner = new Scanner(System.in);
             var result = "";
             while (!result.equals("quit")) {
@@ -165,11 +169,11 @@ public class chessClientInterface {
                             return "game joined successfully.";
                         }
 
-                        JoinPlayerMessage request = new JoinPlayerMessage(authToken,
+                        JoinPlayerMessage request = new JoinPlayerMessage(this.authToken,
                                 this.currentGameList.get(Integer.parseInt(gameID)).gameID(), color);
                         this.socketFacade.send(gson.toJson(request));
                         this.gameStatus = true;
-
+                        this.currentGameLoaded = Integer.parseInt(gameID);
 
                         //ChessBoard board = this.currentGameList.get(Integer.parseInt(gameID)).game().getBoard();
                         //return board.toString() + "\n\n" + board.oppositePerspective();
@@ -184,10 +188,17 @@ public class chessClientInterface {
                         Message temp = this.serverFacade.joinGameUser(this.authToken,
                                 null, currentGameList.get(Integer.parseInt(gameID)).gameID());
                         if (this.currentGameList == null) {
-                            return "game observed successfully.";
+                            return "you need to list games to observe them.";
                         }
-                        ChessBoard board = this.currentGameList.get(Integer.parseInt(gameID)).game().getBoard();
-                        return board.toString() + "\n\n" + board.oppositePerspective();
+
+                        JoinObserverMessage request = new JoinObserverMessage(this.authToken,
+                                this.currentGameList.get(Integer.parseInt(gameID)).gameID());
+                        this.socketFacade.send(gson.toJson(request));
+                        this.gameStatus = true;
+
+                        //ChessBoard board = this.currentGameList.get(Integer.parseInt(gameID)).game().getBoard();
+                        //return board.toString() + "\n\n" + board.oppositePerspective();
+                        return "";
                     }
                     default -> {
                         return "invalid command.";
@@ -237,6 +248,39 @@ public class chessClientInterface {
 
             
         } else {
+            switch (input) {
+                case "help" -> {
+                    System.out.println(SET_TEXT_COLOR_MAGENTA + "  redraw" +
+                            SET_TEXT_COLOR_LIGHT_GREY + " - to update your visual of the current game");
+                    System.out.println(SET_TEXT_COLOR_MAGENTA + "  leave" +
+                            SET_TEXT_COLOR_LIGHT_GREY + " - to exit the game UI");
+                    System.out.println(SET_TEXT_COLOR_MAGENTA + "  make move" +
+                            SET_TEXT_COLOR_LIGHT_GREY + " - to make a legal move with a piece");
+                    System.out.println(SET_TEXT_COLOR_MAGENTA + "  highlight" +
+                            SET_TEXT_COLOR_LIGHT_GREY + " - to all a piece's legal moves");
+                    System.out.println(SET_TEXT_COLOR_MAGENTA + "  resign" +
+                            SET_TEXT_COLOR_LIGHT_GREY + " - to forfeit your active game and quit to the login UI");
+                    return (SET_TEXT_COLOR_MAGENTA + "  help" +
+                            SET_TEXT_COLOR_LIGHT_GREY + " - with possible commands");
+                }
+                case "redraw" -> {
+                    JoinObserverMessage request = new JoinObserverMessage(this.authToken,
+                            this.currentGameLoaded);
+                    this.socketFacade.send(gson.toJson(request));
+                }
+                case "leave" -> {
+                    this.gameStatus = false;
+                }
+                case "make move" -> {
+
+                }
+                case "resign" -> {
+                    this.gameStatus = false;
+                }
+                case "highlight" -> {
+
+                }
+            }
             this.gameStatus = false;
             return "invalid command.";
         }
