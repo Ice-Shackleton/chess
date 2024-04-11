@@ -1,9 +1,13 @@
 package ui;
 
 import chess.ChessBoard;
+import chess.ChessGame;
+import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
 import serverFacade.ServerMain;
+import serverFacade.SocketFacade;
+import webSocketMessages.userCommands.JoinPlayerMessage;
 
 import java.util.HashMap;
 import java.util.Scanner;
@@ -12,30 +16,32 @@ import static ui.EscapeSequences.*;
 public class chessClientInterface {
 
     private final ServerMain serverFacade;
+    private final SocketFacade socketFacade;
     private boolean loginStatus;
     private boolean gameStatus;
     private String authToken = "";
     private HashMap<Integer, GameData> currentGameList = null;
+    private Gson gson = new Gson();
 
-    public chessClientInterface(String url) {
-
-        this.serverFacade = new ServerMain(url);
-        this.loginStatus = false;
-        this.gameStatus = false;
-        Scanner scanner = new Scanner(System.in);
-        var result = "";
-        while (!result.equals("quit")) {
-            printPrompt();
-            String line = scanner.nextLine();
-            try {
-                result = this.eval(line.toLowerCase(), scanner);
-                System.out.print(SET_TEXT_COLOR_LIGHT_GREY +  result);
-            } catch (Exception e) {
-                var msg = e.toString();
-                System.out.print(msg);
+    public chessClientInterface(String url) throws Exception {
+            this.serverFacade = new ServerMain(url);
+            this.socketFacade  = new SocketFacade(url);
+            this.loginStatus = false;
+            this.gameStatus = false;
+            Scanner scanner = new Scanner(System.in);
+            var result = "";
+            while (!result.equals("quit")) {
+                printPrompt();
+                String line = scanner.nextLine();
+                try {
+                    result = this.eval(line.toLowerCase(), scanner);
+                    System.out.print(SET_TEXT_COLOR_LIGHT_GREY + result);
+                } catch (Exception e) {
+                    var msg = e.toString();
+                    System.out.print(msg);
+                }
             }
-        }
-        System.out.println();
+            System.out.println();
     }
 
     /**
@@ -46,7 +52,7 @@ public class chessClientInterface {
      * @param input the user's command, taken from the terminal.
      * @return
      */
-    private String eval(String input, Scanner lineReader) throws ResponseException {
+    private String eval(String input, Scanner lineReader) throws Exception {
         //this line is used to check if the user has their websocket open.
         if (!this.gameStatus) {
             //phase 5 stuff.
@@ -126,15 +132,48 @@ public class chessClientInterface {
                         String gameID = lineReader.nextLine();
                         System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "\t[DESIRED_COLOR] >>> ");
                         String playerColor = lineReader.nextLine();
+
+                        boolean badEntry = true;
+                        ChessGame.TeamColor color = ChessGame.TeamColor.WHITE;
+
+                        if(playerColor.equalsIgnoreCase("white")) {
+                            badEntry = false;
+                            color = ChessGame.TeamColor.WHITE;
+                        }
+                        if (playerColor.equalsIgnoreCase("black")) {
+                            badEntry = false;
+                            color = ChessGame.TeamColor.BLACK;
+                        }
+
+                        while (badEntry) {
+                            System.out.println(SET_TEXT_COLOR_MAGENTA + "invalid color; enter 'white' or 'black' only.");
+                            System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "\t[DESIRED_COLOR] >>> ");
+                            playerColor = lineReader.nextLine();
+                            if(playerColor.equalsIgnoreCase("white")) {
+                                badEntry = false;
+                                color = ChessGame.TeamColor.WHITE;
+                            }
+                            if (playerColor.equalsIgnoreCase("black")) {
+                                badEntry = false;
+                                color = ChessGame.TeamColor.BLACK;
+                            }
+                        }
+
                         Message temp = this.serverFacade.joinGameUser(this.authToken,
                                 playerColor.toUpperCase(), this.currentGameList.get(Integer.parseInt(gameID)).gameID());
                         if (this.currentGameList == null) {
                             return "game joined successfully.";
                         }
 
+                        JoinPlayerMessage request = new JoinPlayerMessage(authToken,
+                                this.currentGameList.get(Integer.parseInt(gameID)).gameID(), color);
+                        this.socketFacade.send(gson.toJson(request));
+                        this.gameStatus = true;
 
-                        ChessBoard board = this.currentGameList.get(Integer.parseInt(gameID)).game().getBoard();
-                        return board.toString() + "\n\n" + board.oppositePerspective();
+
+                        //ChessBoard board = this.currentGameList.get(Integer.parseInt(gameID)).game().getBoard();
+                        //return board.toString() + "\n\n" + board.oppositePerspective();
+                        return "";
                     }
                     case "join as observer" -> {
                         if (this.currentGameList == null) {
@@ -198,6 +237,7 @@ public class chessClientInterface {
 
             
         } else {
+            this.gameStatus = false;
             return "invalid command.";
         }
     }
