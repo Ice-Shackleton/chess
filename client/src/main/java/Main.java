@@ -2,8 +2,10 @@ import chess.*;
 import com.google.gson.Gson;
 import serverFacade.SocketFacade;
 import ui.*;
+import webSocketMessages.serverMessages.LoadGameMessage;
 import webSocketMessages.userCommands.JoinObserverMessage;
 import webSocketMessages.userCommands.JoinPlayerMessage;
+import webSocketMessages.userCommands.MakeMoveMessage;
 
 public class Main {
     public static void main(String[] args) {
@@ -12,11 +14,15 @@ public class Main {
 
         try {
             SocketFacade temp = new SocketFacade("localhost:" + 8080);
-            JoinObserverMessage join = new JoinObserverMessage("21149671-39ed-43d3-9a01-4b44723387d5", 1);
-            temp.send(new Gson().toJson(join));
+            JoinObserverMessage screen = new JoinObserverMessage("1396a76b-20ee-4bc5-ad16-058adad1c35d", 22);
+            temp.send(new Gson().toJson(screen));
+            ChessMove stuff = new ChessMove(new ChessPosition(2, 1), new ChessPosition(3,1), null);
+            MakeMoveMessage move = new MakeMoveMessage("1396a76b-20ee-4bc5-ad16-058adad1c35d", 22, stuff);
+            temp.send(new Gson().toJson(move));
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+
 
 
         try {

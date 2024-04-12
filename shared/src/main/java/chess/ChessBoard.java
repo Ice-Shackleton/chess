@@ -217,7 +217,8 @@ public class ChessBoard {
     }
 
     /**
-     * This overrides the usual toString method to print out the chess board.
+     * This overrides the usual toString method to print out the chess board. It prints with the White side
+     * on the top, and the Black pieces on the bottom.
      * Ideally, it can be used to print out any board state.
      * @return A stringbuilder.toString that will represent the current board state.
      */

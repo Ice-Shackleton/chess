@@ -2,11 +2,10 @@ package server;
 
 import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
-import dataAccess.AuthDAO;
-import dataAccess.DataAccessException;
-import dataAccess.GameDAO;
-import dataAccess.UserDAO;
+import dataAccess.*;
 import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
@@ -18,6 +17,7 @@ import webSocketMessages.serverMessages.LoadGameMessage;
 import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.JoinObserverMessage;
 import webSocketMessages.userCommands.JoinPlayerMessage;
+import webSocketMessages.userCommands.MakeMoveMessage;
 import webSocketMessages.userCommands.UserGameCommand;
 
 import java.util.ArrayList;
@@ -119,6 +119,21 @@ public class WSServer {
                     throw new Exception("no game found");
                 }
                 LoadGameMessage response = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game.game());
+                session.getRemote().sendString(gson.toJson(response));
+
+            } else if (msg.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE) {
+
+                MakeMoveMessage request = gson.fromJson(message, MakeMoveMessage.class);
+                ChessMove move = request.move;
+                ChessGame game = this.gameDAO.getSingleGame(request.gameId);
+
+                try {
+                    game.makeMove(move);
+                } catch (InvalidMoveException e) {
+                    throw new Exception("attempted to move a piece who's color was not in turn order.");
+                }
+                this.gameDAO.updateSingleGame(request.gameId, game);
+                LoadGameMessage response = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
                 session.getRemote().sendString(gson.toJson(response));
 
             } else {

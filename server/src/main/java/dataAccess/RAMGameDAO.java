@@ -118,4 +118,14 @@ public class RAMGameDAO implements GameDAO{
         }
         return false;
     }
+
+    @Override
+    public ChessGame getSingleGame(int gameId) throws DataAccessException {
+        return null;
+    }
+
+    @Override
+    public void updateSingleGame(int gameID, ChessGame game) throws DataAccessException {
+
+    }
 }

@@ -1,5 +1,6 @@
 package dataAccess;
 
+import chess.ChessGame;
 import model.GameData;
 
 import java.sql.SQLException;
@@ -19,4 +20,7 @@ public interface GameDAO {
 
     public boolean joinGame(String color, int gameID, String username) throws dataAccess.DataAccessException;
 
+    public ChessGame getSingleGame(int gameId) throws DataAccessException;
+
+    public void updateSingleGame(int gameID, ChessGame game) throws DataAccessException;
 }

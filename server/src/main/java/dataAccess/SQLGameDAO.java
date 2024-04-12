@@ -7,17 +7,26 @@ import model.GameData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class SQLGameDAO implements GameDAO {
 
+    private static SQLGameDAO instance;
     private static int gameIDGenerator = 0;
+
+    public static synchronized GameDAO getInstance() throws DataAccessException {
+        if (instance == null) {
+            instance = new SQLGameDAO();
+        }
+        return instance;
+    }
 
     public SQLGameDAO() throws dataAccess.DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(
                     """
                             CREATE TABLE  IF NOT EXISTS gameDAO (
-                            gameID INT NOT NULL,
+                            gameID INT NOT NULL AUTO_INCREMENT,
                             whiteUsername VARCHAR(255) DEFAULT NULL,
                             blackUsername VARCHAR(255) DEFAULT NULL,
                             gameName VARCHAR(255) NOT NULL,
@@ -110,23 +119,27 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public int createGame(String gameName) throws DataAccessException {
-        int gameID = gameIDGenerator+1;
-        gameIDGenerator +=1;
         ChessGame thisGame = new ChessGame();
         try (var conn = DatabaseManager.getConnection()){
             try (var preparedStatement = conn.prepareStatement(
-                    "INSERT INTO gameDAO (gameID, gameName, chessGame)" +
-                            " VALUES(?, ?, ?)")) {
+                    "INSERT INTO gameDAO (gameName, chessGame)" +
+                            " VALUES(?, ?)")) {
 
-                preparedStatement.setString(1, Integer.toString(gameID));
-                preparedStatement.setString(2, gameName);
-                preparedStatement.setString(3, new Gson().toJson(thisGame, ChessGame.class));
+                preparedStatement.setString(1, gameName);
+                preparedStatement.setString(2, new Gson().toJson(thisGame));
                 preparedStatement.executeUpdate();
 
-                return gameID;
+                ArrayList<GameData> temp = getGameList();
+                for (GameData game : temp) {
+                    if (Objects.equals(game.gameName(), gameName)) {
+                        return game.gameID();
+                    }
+                }
+                throw new DataAccessException("for some reason, created game doesn't exist.");
             }
         } catch (SQLException | DataAccessException e) {
             gameIDGenerator-=1;
+            System.out.println(e.getMessage());
             throw new DataAccessException(e.getMessage());
         }
     }
@@ -189,4 +202,39 @@ public class SQLGameDAO implements GameDAO {
             throw new dataAccess.DataAccessException(e.getMessage());
         }
     }
+
+    @Override
+    public ChessGame getSingleGame(int gameID) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("SELECT * FROM gameDAO WHERE gameID = ?")) {
+                preparedStatement.setString(1, Integer.toString(gameID));
+                ResultSet games = preparedStatement.executeQuery();
+
+                if (games.next()) {
+                    return new Gson().fromJson(games.getString("chessGame"), ChessGame.class);
+                }
+                return null;
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void updateSingleGame(int gameID, ChessGame game) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(
+                    "UPDATE gameDAO SET chessGame = ? WHERE gameID = ?")) {
+
+                preparedStatement.setString(1, new Gson().toJson(game));
+                preparedStatement.setString(2, Integer.toString(gameID));
+                preparedStatement.executeUpdate();
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
+
+    }
+
+
 }

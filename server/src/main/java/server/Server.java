@@ -24,7 +24,7 @@ public class Server {
         AuthDAO authDAO;
         try {
             ChessDatabaseManager.chessDatabase();
-            gameDAO = new SQLGameDAO();
+            gameDAO = SQLGameDAO.getInstance();
             authDAO = new SQLAuthDAO();
             userDAO = new SQLUserDAO();
         } catch (dataAccess.DataAccessException e) {

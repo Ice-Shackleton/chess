@@ -2,6 +2,8 @@ package ui;
 
 import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
@@ -9,6 +11,7 @@ import serverFacade.ServerMain;
 import serverFacade.SocketFacade;
 import webSocketMessages.userCommands.JoinObserverMessage;
 import webSocketMessages.userCommands.JoinPlayerMessage;
+import webSocketMessages.userCommands.MakeMoveMessage;
 
 import java.util.HashMap;
 import java.util.Scanner;
@@ -119,7 +122,7 @@ public class chessClientInterface {
                             this.currentGameList.put(i, game);
                             i++;
                         }
-                        return "\nlist complete.";
+                        return "list complete.";
                     }
                     /**
                      * This method is smarter than it looks. In essence, when a user opens a client to join a game, it
@@ -173,7 +176,7 @@ public class chessClientInterface {
                                 this.currentGameList.get(Integer.parseInt(gameID)).gameID(), color);
                         this.socketFacade.send(gson.toJson(request));
                         this.gameStatus = true;
-                        this.currentGameLoaded = Integer.parseInt(gameID);
+                        this.currentGameLoaded = this.currentGameList.get(Integer.parseInt(gameID)).gameID();
 
                         //ChessBoard board = this.currentGameList.get(Integer.parseInt(gameID)).game().getBoard();
                         //return board.toString() + "\n\n" + board.oppositePerspective();
@@ -195,6 +198,7 @@ public class chessClientInterface {
                                 this.currentGameList.get(Integer.parseInt(gameID)).gameID());
                         this.socketFacade.send(gson.toJson(request));
                         this.gameStatus = true;
+                        this.currentGameLoaded = this.currentGameList.get(Integer.parseInt(gameID)).gameID();
 
                         //ChessBoard board = this.currentGameList.get(Integer.parseInt(gameID)).game().getBoard();
                         //return board.toString() + "\n\n" + board.oppositePerspective();
@@ -264,39 +268,97 @@ public class chessClientInterface {
                             SET_TEXT_COLOR_LIGHT_GREY + " - with possible commands");
                 }
                 case "redraw" -> {
-                    JoinObserverMessage request = new JoinObserverMessage(this.authToken,
-                            this.currentGameLoaded);
+                    JoinObserverMessage request = new JoinObserverMessage(this.authToken, this.currentGameLoaded);
                     this.socketFacade.send(gson.toJson(request));
                 }
                 case "leave" -> {
                     this.gameStatus = false;
                 }
                 case "make move" -> {
+                    GameData game = getExactGame(this.currentGameLoaded);
+                    System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "\t[START_POSITION] >>> ");
+                    String start = lineReader.nextLine();
+                    while (start.length() != 2) {
+                        System.out.print(SET_TEXT_COLOR_MAGENTA + "invalid entry. remember to enter your start in chess notation," +
+                                "as in 'e4' or 'a7'. The letter represents the row, and the number the column."
+                                + SET_TEXT_COLOR_LIGHT_GREY + "\n\t[START_POSITION] >>> ");
+                        start = lineReader.nextLine();
+                    }
+                    System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "\t[END_POSITION] >>> ");
+                    String end = lineReader.nextLine();
+                    while (end.length() != 2) {
+                        System.out.print(SET_TEXT_COLOR_MAGENTA + "invalid entry. remember to enter your start in chess notation," +
+                                "as in 'e4' or 'a7'. The letter represents the row, and the number the column."
+                                + SET_TEXT_COLOR_LIGHT_GREY + "\n\t[END_POSITION] >>> ");
+                        end = lineReader.nextLine();
+                    }
 
+                    ChessPosition startPos = convertNotation(start);
+                    ChessPosition endPos = convertNotation(end);
+                    if (startPos == null) {
+                        System.out.print(SET_TEXT_COLOR_MAGENTA + "invalid start position. returning to game UI.");
+                        break;
+                    } else if (endPos == null) {
+                        System.out.print(SET_TEXT_COLOR_MAGENTA + "invalid end position. returning to game UI.");
+                        break;
+                    }
+
+                    ChessMove move = new ChessMove(startPos, endPos, null);
+                    MakeMoveMessage moveMessage = new MakeMoveMessage(this.authToken, this.currentGameLoaded, move);
+                    this.socketFacade.send(gson.toJson(moveMessage));
+                    return "";
                 }
                 case "resign" -> {
                     this.gameStatus = false;
                 }
                 case "highlight" -> {
-
+                    return "no, screw you.";
+                }
+                default -> {
+                    return "invalid command.";
                 }
             }
-            this.gameStatus = false;
-            return "invalid command.";
+            return "";
         }
     }
 
     private void printPrompt() {
-        if (this.loginStatus){
-            System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "\n[LOGGED_IN] >>> ");
+        if (!this.gameStatus) {
+            if (this.loginStatus) {
+                System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "\n[LOGGED_IN] >>> ");
+            } else {
+                System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "\n[LOGGED_OUT] >>> ");
+            }
         } else {
-            System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "\n[LOGGED_OUT] >>> ");
+            System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "\n[GAME] >>> ");
         }
     }
 
+    private GameData getExactGame(Integer gameID) throws ResponseException {
+        GameRecord games = this.serverFacade.listGamesUser(this.authToken);
+        GameData theThing = null;
+        for (GameData game : games.games()) {
+            if (this.currentGameLoaded.equals(game.gameID())) {
+                theThing = game;
+                break;
+            }
+        }
+        return theThing;
+    }
 
-
-
+    private ChessPosition convertNotation(String postion) {
+        try {
+            if (postion.length() != 2) {
+                return null;
+            }
+            char row = postion.charAt(0);
+            Integer col = Integer.parseInt(String.valueOf(postion.charAt(1)));
+            int realRow = Character.getNumericValue(row) - 9;
+            return new ChessPosition(realRow, col);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
 
 }
