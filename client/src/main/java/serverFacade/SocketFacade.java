@@ -3,6 +3,7 @@ package serverFacade;
 import com.google.gson.Gson;
 import webSocketMessages.serverMessages.ErrorMessage;
 import webSocketMessages.serverMessages.LoadGameMessage;
+import webSocketMessages.serverMessages.NotificationMessage;
 import webSocketMessages.serverMessages.ServerMessage;
 
 import javax.websocket.*;
@@ -45,7 +46,12 @@ public class SocketFacade extends Endpoint {
             ServerMessage response = gson.fromJson(message, ServerMessage.class);
             if (response.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
                 LoadGameMessage effect = gson.fromJson(message, LoadGameMessage.class);
-                System.out.println("\n" + effect.game.getBoard().toString());
+                System.out.println(SET_TEXT_COLOR_GREEN + "black is green; white is magenta.");
+                System.out.println("\n" + effect.game.getBoard().oppositePerspective());
+                System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "[GAME] >>> ");
+            } else if (response.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
+                NotificationMessage note = gson.fromJson(message, NotificationMessage.class);
+                System.out.println("\n" + SET_TEXT_COLOR_MAGENTA + note.notification);
                 System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "[GAME] >>> ");
             } else {
                 ErrorMessage error = gson.fromJson(message, ErrorMessage.class);

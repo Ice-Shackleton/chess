@@ -1,9 +1,6 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.ChessPosition;
+import chess.*;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
@@ -82,7 +79,7 @@ public class chessClientInterface {
                         System.out.println(SET_TEXT_COLOR_MAGENTA + "  join as observer" +
                                 SET_TEXT_COLOR_LIGHT_GREY + " - to observe an active game");
                         System.out.println(SET_TEXT_COLOR_MAGENTA + "  display" +
-                                SET_TEXT_COLOR_LIGHT_GREY + " - to visualize a specific game");
+                                SET_TEXT_COLOR_LIGHT_GREY + " - to rejoin a specific game");
                         return (SET_TEXT_COLOR_MAGENTA + "  help" +
                                 SET_TEXT_COLOR_LIGHT_GREY + " - with possible commands");
                     }
@@ -204,6 +201,16 @@ public class chessClientInterface {
                         //return board.toString() + "\n\n" + board.oppositePerspective();
                         return "";
                     }
+                    case "display" -> {
+                        System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "\t[GAME_ID] >>> ");
+                        String gameID = lineReader.nextLine();
+                        JoinObserverMessage request = new JoinObserverMessage(this.authToken,
+                                this.currentGameList.get(Integer.parseInt(gameID)).gameID());
+                        this.socketFacade.send(gson.toJson(request));
+                        this.gameStatus = true;
+                        this.currentGameLoaded = this.currentGameList.get(Integer.parseInt(gameID)).gameID();
+                        return "";
+                    }
                     default -> {
                         return "invalid command.";
                     }
@@ -295,6 +302,23 @@ public class chessClientInterface {
 
                     ChessPosition startPos = convertNotation(start);
                     ChessPosition endPos = convertNotation(end);
+                    ChessPiece.PieceType type = null;
+                    if (endPos.getRow() == 1 || endPos.getRow() == 8) {
+                        System.out.print(SET_TEXT_COLOR_MAGENTA +
+                                "please enter what piece type this move should be promoted to.\n");
+                        System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "\t[PIECE_TYPE] >>> ");
+                        String promotion = lineReader.nextLine();
+                        type = promotionTranslation(promotion);
+                        while (type == null) {
+                            System.out.print(SET_TEXT_COLOR_MAGENTA + "invalid entry. remember, valid promotion pieces are as follows:" +
+                                    " 'knight', 'bishop', 'rook', and 'queen'.\n" +
+                                    "please enter what piece type this move should be promoted to.\n");
+                            System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "\t[PIECE_TYPE] >>> ");
+                            promotion = lineReader.nextLine();
+                            type = promotionTranslation(promotion);
+                        }
+                    }
+
                     if (startPos == null) {
                         System.out.print(SET_TEXT_COLOR_MAGENTA + "invalid start position. returning to game UI.");
                         break;
@@ -303,7 +327,7 @@ public class chessClientInterface {
                         break;
                     }
 
-                    ChessMove move = new ChessMove(startPos, endPos, null);
+                    ChessMove move = new ChessMove(startPos, endPos, type);
                     MakeMoveMessage moveMessage = new MakeMoveMessage(this.authToken, this.currentGameLoaded, move);
                     this.socketFacade.send(gson.toJson(moveMessage));
                     return "";
@@ -353,12 +377,24 @@ public class chessClientInterface {
             }
             char row = postion.charAt(0);
             Integer col = Integer.parseInt(String.valueOf(postion.charAt(1)));
-            int realRow = Character.getNumericValue(row) - 9;
-            return new ChessPosition(realRow, col);
+            int realRow = 9 - (Character.getNumericValue(row) - 9);
+            return new ChessPosition(col, realRow);
         } catch (Exception e) {
             return null;
         }
     }
 
+    private ChessPiece.PieceType promotionTranslation(String input) {
+        if (input.equalsIgnoreCase("bishop")) {
+            return ChessPiece.PieceType.BISHOP;
+        } else if (input.equalsIgnoreCase("rook")) {
+            return ChessPiece.PieceType.ROOK;
+        } else if (input.equalsIgnoreCase("knight")) {
+            return ChessPiece.PieceType.KNIGHT;
+        } else if (input.equalsIgnoreCase("queen")){
+            return ChessPiece.PieceType.QUEEN;
+        }
+        return null;
+    }
 
 }

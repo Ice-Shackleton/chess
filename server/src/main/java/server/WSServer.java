@@ -1,9 +1,6 @@
 package server;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.InvalidMoveException;
+import chess.*;
 import com.google.gson.Gson;
 import dataAccess.*;
 import model.AuthData;
@@ -14,13 +11,16 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import spark.Spark;
 import webSocketMessages.serverMessages.ErrorMessage;
 import webSocketMessages.serverMessages.LoadGameMessage;
+import webSocketMessages.serverMessages.NotificationMessage;
 import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.JoinObserverMessage;
 import webSocketMessages.userCommands.JoinPlayerMessage;
 import webSocketMessages.userCommands.MakeMoveMessage;
 import webSocketMessages.userCommands.UserGameCommand;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 @WebSocket
 public class WSServer {
@@ -29,10 +29,11 @@ public class WSServer {
     UserDAO userDAO;
     GameDAO gameDAO;
     AuthDAO authDAO;
+    ConnectionManager manager;
 
     //UserDAO userDAO, GameDAO gameDAO, AuthDAO authDAO
     public WSServer(UserDAO userDAO, GameDAO gameDAO, AuthDAO authDAO) {
-
+        this.manager = new ConnectionManager();
         this.userDAO = userDAO;
         this.gameDAO = gameDAO;
         this.authDAO = authDAO;
@@ -49,8 +50,9 @@ public class WSServer {
                 GameData game = null;
                 //Implementing the logic of join_player here.
                 //First, verifying the authToken.
+                AuthData token = null;
                 try {
-                    AuthData token = this.authDAO.getAuth(request.getAuthString());
+                    token = this.authDAO.getAuth(request.getAuthString());
                     if (token == null) {
                         throw new dataAccess.DataAccessException("no such authToken exists");
                     }
@@ -90,14 +92,19 @@ public class WSServer {
 
                 LoadGameMessage response = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game.game());
                 session.getRemote().sendString(gson.toJson(response));
+                this.manager.add(token.authToken(), game.gameID(), session);
+                String note = "a new player has joined " + game.gameName() + ", as the color "
+                        + request.playerColor.toString() + ".";
+                sendNotes(note, session, game);
 
             } else if (msg.getCommandType() == UserGameCommand.CommandType.JOIN_OBSERVER) {
                 //this does much the same work as joinPlayer, but with much less verification.
                 //First, verifying the authToken.
                 JoinObserverMessage request = gson.fromJson(message, JoinObserverMessage.class);
                 GameData game = null;
+                AuthData token = null;
                 try {
-                    AuthData token = this.authDAO.getAuth(request.getAuthString());
+                    token = this.authDAO.getAuth(request.getAuthString());
                     if (token == null) {
                         throw new dataAccess.DataAccessException("no such authToken exists");
                     }
@@ -120,6 +127,9 @@ public class WSServer {
                 }
                 LoadGameMessage response = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game.game());
                 session.getRemote().sendString(gson.toJson(response));
+                this.manager.add(token.authToken(), game.gameID(), session);
+                String note = "a new player has joined " + game.gameName() + " as an observer.";
+                sendNotes(note, session, game);
 
             } else if (msg.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE) {
 
@@ -135,6 +145,9 @@ public class WSServer {
                 this.gameDAO.updateSingleGame(request.gameId, game);
                 LoadGameMessage response = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
                 session.getRemote().sendString(gson.toJson(response));
+                String note = "A player has moved " + assignChessNotation(move.getStartPosition())
+                        + " to " + assignChessNotation(move.getEndPosition()) + ".";
+
 
             } else {
                 throw new Exception("You idiot");
@@ -145,4 +158,41 @@ public class WSServer {
             session.getRemote().sendString(gson.toJson(error));
         }
     }
+
+    private void sendNotes(String note, Session session, GameData game) throws IOException {
+        NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                note);
+        for (Session individual : this.manager.getAllInGame(game.gameID())) {
+            if (individual != session) {
+                individual.getRemote().sendString(gson.toJson(notification));
+            }
+        }
+    }
+
+    private String assignChessNotation(ChessPosition position) {
+        int row = position.getRow();
+        String temp = "";
+        if (row == 1) {
+            temp += "a";
+        } else if (row == 2){
+            temp += "b";
+        } else if (row == 3) {
+            temp += "c";
+        } else if (row == 4) {
+            temp += "d";
+        } else if (row == 5) {
+            temp += "e";
+        } else if (row == 6) {
+            temp += "f";
+        } else if (row == 7) {
+            temp += "g";
+        } else if (row == 8) {
+            temp += "h";
+        } else {
+            return null;
+        }
+        temp += position.getColumn();
+        return temp;
+    }
+
 }

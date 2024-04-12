@@ -210,7 +210,7 @@ public class ChessBoard {
             state.append(SET_TEXT_COLOR_WHITE);
             state.append(RESET_BG_COLOR);
             state.append("  ");
-            state.append(8-i);
+            state.append(i+1);
 
         }
         return state.toString();

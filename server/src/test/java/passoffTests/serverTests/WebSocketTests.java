@@ -73,7 +73,7 @@ public class WebSocketTests {
         environment.disconnectAll();
     }
 
-
+7
     @Test
     @Order(1)
     @DisplayName("Normal Join Player")

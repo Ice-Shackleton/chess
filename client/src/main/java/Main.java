@@ -12,16 +12,17 @@ public class Main {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         System.out.println("♕ 240 Chess Client: ");
 
-        try {
+        /*try {
             SocketFacade temp = new SocketFacade("localhost:" + 8080);
             JoinObserverMessage screen = new JoinObserverMessage("1396a76b-20ee-4bc5-ad16-058adad1c35d", 22);
             temp.send(new Gson().toJson(screen));
-            ChessMove stuff = new ChessMove(new ChessPosition(2, 1), new ChessPosition(3,1), null);
+            ChessMove stuff = new ChessMove(new ChessPosition(3, 2), new ChessPosition(2,2), null);
+            //ChessMove stuff = new ChessMove(new ChessPosition(7, 7), new ChessPosition(5,7), null);
             MakeMoveMessage move = new MakeMoveMessage("1396a76b-20ee-4bc5-ad16-058adad1c35d", 22, stuff);
             temp.send(new Gson().toJson(move));
         } catch (Exception e) {
             System.out.println(e.getMessage());
-        }
+        } */
 
 
 
