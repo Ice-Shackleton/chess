@@ -2,17 +2,17 @@ package webSocketMessages.serverMessages;
 
 public class NotificationMessage extends ServerMessage {
 
-    public String notification;
+    public String message;
 
-    public NotificationMessage(ServerMessageType type, String notification) {
+    public NotificationMessage(ServerMessageType type, String message) {
         super(type);
-        this.notification = notification;
+        this.message = message;
     }
 
     @Override
     public String toString() {
         return "NotificationMessage{" +
-                '\'' + notification + '\'' +
+                '\'' + message + '\'' +
                 '}';
     }
 

@@ -99,7 +99,7 @@ public class SQLGameDAO implements GameDAO {
             try (var preparedStatement = conn.prepareStatement("SELECT * FROM gameDAO WHERE gameID = ?")) {
                 preparedStatement.setString(1, Integer.toString(gameID));
                 games = preparedStatement.executeQuery();
-                if( games.next()){
+                if(games.next()){
                     if (color.equals("WHITE")) {
                         return games.getString("whiteUsername") != null;
                     }

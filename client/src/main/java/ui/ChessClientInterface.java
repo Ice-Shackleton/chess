@@ -6,9 +6,7 @@ import exception.ResponseException;
 import model.*;
 import serverFacade.ServerMain;
 import serverFacade.SocketFacade;
-import webSocketMessages.userCommands.JoinObserverMessage;
-import webSocketMessages.userCommands.JoinPlayerMessage;
-import webSocketMessages.userCommands.MakeMoveMessage;
+import webSocketMessages.userCommands.*;
 
 import java.util.HashMap;
 import java.util.Scanner;
@@ -280,6 +278,9 @@ public class chessClientInterface {
                 }
                 case "leave" -> {
                     this.gameStatus = false;
+                    LeaveMessage request = new LeaveMessage(this.authToken, this.currentGameLoaded);
+                    socketFacade.send(gson.toJson(request));
+                    return "";
                 }
                 case "make move" -> {
                     GameData game = getExactGame(this.currentGameLoaded);
@@ -334,6 +335,9 @@ public class chessClientInterface {
                 }
                 case "resign" -> {
                     this.gameStatus = false;
+                    ResignMessage request = new ResignMessage(this.authToken, this.currentGameLoaded);
+                    this.socketFacade.send(gson.toJson(request));
+                    return "";
                 }
                 case "highlight" -> {
                     return "no, screw you.";
@@ -342,8 +346,8 @@ public class chessClientInterface {
                     return "invalid command.";
                 }
             }
-            return "";
         }
+        return "";
     }
 
     private void printPrompt() {

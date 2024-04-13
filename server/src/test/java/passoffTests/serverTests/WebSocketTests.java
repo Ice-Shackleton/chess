@@ -73,7 +73,7 @@ public class WebSocketTests {
         environment.disconnectAll();
     }
 
-7
+
     @Test
     @Order(1)
     @DisplayName("Normal Join Player")
@@ -92,6 +92,7 @@ public class WebSocketTests {
 
         //check received messages
         assertLoadGameMessage(messages.get(black.user));
+        //for some reason
         assertNotificationMessage(messages.get(white.user));
     }
 

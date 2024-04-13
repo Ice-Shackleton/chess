@@ -51,7 +51,7 @@ public class SocketFacade extends Endpoint {
                 System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "[GAME] >>> ");
             } else if (response.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
                 NotificationMessage note = gson.fromJson(message, NotificationMessage.class);
-                System.out.println("\n" + SET_TEXT_COLOR_MAGENTA + note.notification);
+                System.out.println("\n" + SET_TEXT_COLOR_MAGENTA + note.message);
                 System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "[GAME] >>> ");
             } else {
                 ErrorMessage error = gson.fromJson(message, ErrorMessage.class);

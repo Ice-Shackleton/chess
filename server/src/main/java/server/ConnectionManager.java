@@ -44,4 +44,8 @@ public class ConnectionManager {
         return null;
     }
 
+    public void destroyGame(String authToken) {
+        openGames.remove(authToken);
+    }
+
 }

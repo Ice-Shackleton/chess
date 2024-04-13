@@ -13,14 +13,12 @@ import webSocketMessages.serverMessages.ErrorMessage;
 import webSocketMessages.serverMessages.LoadGameMessage;
 import webSocketMessages.serverMessages.NotificationMessage;
 import webSocketMessages.serverMessages.ServerMessage;
-import webSocketMessages.userCommands.JoinObserverMessage;
-import webSocketMessages.userCommands.JoinPlayerMessage;
-import webSocketMessages.userCommands.MakeMoveMessage;
-import webSocketMessages.userCommands.UserGameCommand;
+import webSocketMessages.userCommands.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 @WebSocket
 public class WSServer {
@@ -30,13 +28,14 @@ public class WSServer {
     GameDAO gameDAO;
     AuthDAO authDAO;
     ConnectionManager manager;
-
+    HashSet<Integer> destroyedGames;
     //UserDAO userDAO, GameDAO gameDAO, AuthDAO authDAO
     public WSServer(UserDAO userDAO, GameDAO gameDAO, AuthDAO authDAO) {
         this.manager = new ConnectionManager();
         this.userDAO = userDAO;
         this.gameDAO = gameDAO;
         this.authDAO = authDAO;
+        this.destroyedGames = new HashSet<>();
 
     }
 
@@ -83,19 +82,29 @@ public class WSServer {
                     if (game.whiteUsername() == null) {
                         throw new Exception("user is not in specified color.");
                     }
+                    if (!game.whiteUsername().equals(token.username())) {
+                            throw new Exception("user attempting to join white, which is already occupied.");
+                    }
+
                 }
                 if (request.playerColor == ChessGame.TeamColor.BLACK) {
                     if (game.blackUsername() == null) {
                         throw new Exception("user is not in specified color.");
                     }
+                    if (!game.blackUsername().equals(token.username())) {
+                        throw new Exception("user attempting to join black, which is already occupied.");
+                    }
                 }
+
+                System.out.println("user attempting to join is this: " + request.getAuthString());
+                System.out.println("attempting to join game '" + game.gameName() + "'");
 
                 LoadGameMessage response = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game.game());
                 session.getRemote().sendString(gson.toJson(response));
                 this.manager.add(token.authToken(), game.gameID(), session);
                 String note = "a new player has joined " + game.gameName() + ", as the color "
                         + request.playerColor.toString() + ".";
-                sendNotes(note, session, game);
+                sendNotes(note, session, game.gameID());
 
             } else if (msg.getCommandType() == UserGameCommand.CommandType.JOIN_OBSERVER) {
                 //this does much the same work as joinPlayer, but with much less verification.
@@ -115,7 +124,7 @@ public class WSServer {
                 ArrayList<GameData> temp = gameDAO.getGameList();
                 int i = 0;
                 while (i < temp.size()) {
-                    if (temp.get(i).gameID() == request.gameId) {
+                    if (temp.get(i).gameID() == request.gameID) {
                         game = temp.get(i);
                         break;
                     }
@@ -129,42 +138,110 @@ public class WSServer {
                 session.getRemote().sendString(gson.toJson(response));
                 this.manager.add(token.authToken(), game.gameID(), session);
                 String note = "a new player has joined " + game.gameName() + " as an observer.";
-                sendNotes(note, session, game);
+                sendNotes(note, session, game.gameID());
 
             } else if (msg.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE) {
 
                 MakeMoveMessage request = gson.fromJson(message, MakeMoveMessage.class);
+                if (this.destroyedGames.contains(request.gameID)) {
+                    throw new Exception("attempted to make a move on a game where no more moves can be made, " +
+                            "due to resignation or stalemate.");
+                }
                 ChessMove move = request.move;
-                ChessGame game = this.gameDAO.getSingleGame(request.gameId);
+                ChessGame game = this.gameDAO.getSingleGame(request.gameID);
 
                 try {
                     game.makeMove(move);
                 } catch (InvalidMoveException e) {
-                    throw new Exception("attempted to move a piece who's color was not in turn order.");
+                    throw new Exception(e.getMessage());
                 }
-                this.gameDAO.updateSingleGame(request.gameId, game);
+                this.gameDAO.updateSingleGame(request.gameID, game);
                 LoadGameMessage response = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
-                session.getRemote().sendString(gson.toJson(response));
+                sendLoads(gson.toJson(response), session, request.gameID);
                 String note = "A player has moved " + assignChessNotation(move.getStartPosition())
                         + " to " + assignChessNotation(move.getEndPosition()) + ".";
+                if (game.isInCheck(game.getTeamTurn()) && !game.isInCheckmate(game.getTeamTurn())) {
+                    note += "\n team " + game.getTeamTurn() + " is in check.";
+                } else if (game.isInCheckmate(game.getTeamTurn())) {
+                    note += "\nteam " + game.getTeamTurn()
+                            + " is in checkmate! no more moves can be made in game " + game.getGameName() + ".";
+                    this.manager.destroyGame(request.getAuthString());
+                    this.destroyedGames.add(request.gameID);
+                } else if (game.isInStalemate(game.getTeamTurn())) {
+                    note += "\nteam " + game.getTeamTurn()
+                            + " is in stalemate! no more moves can be made in game " + game.getGameName() + ".";
+                    this.manager.destroyGame(request.getAuthString());
+                    this.destroyedGames.add(request.gameID);
+                }
+
+                sendNotes(note, session, request.gameID);
 
 
+            } else if (msg.getCommandType() == UserGameCommand.CommandType.LEAVE) {
+                LeaveMessage request = gson.fromJson(message, LeaveMessage.class);
+                GameData game = null;
+                ArrayList<GameData> temp = gameDAO.getGameList();
+                int i = 0;
+                while (i < temp.size()) {
+                    if (temp.get(i).gameID() == request.gameID) {
+                        game = temp.get(i);
+                        break;
+                    }
+                    i++;
+                }
+                String note = "A user has left game '" + game.gameName() + "'.";
+                sendNotes(note, session, game.gameID());
+                this.manager.remove(request.getAuthString());
+            } else if (msg.getCommandType() == UserGameCommand.CommandType.RESIGN) {
+                ResignMessage request = gson.fromJson(message, ResignMessage.class);
+                GameData game = null;
+                ArrayList<GameData> temp = gameDAO.getGameList();
+                int i = 0;
+                while (i < temp.size()) {
+                    if (temp.get(i).gameID() == request.gameID) {
+                        game = temp.get(i);
+                        break;
+                    }
+                    i++;
+                }
+                if (game == null) {
+                    throw new Exception("attempted to resign from a game that does not exist");
+                }
+                this.manager.destroyGame(request.getAuthString());
+                this.destroyedGames.add(game.gameID());
+                String note = "a user has resigned from game '" + game.gameName() + "'.";
+                sendNotes(note, session, game.gameID());
             } else {
-                throw new Exception("You idiot");
+                throw new Exception("provided an invalid game.");
             }
 
         } catch (Exception e) {
+            System.out.println("an error occurred, with the following message: '" + e.getMessage() + "'.");
             ErrorMessage error = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
             session.getRemote().sendString(gson.toJson(error));
         }
     }
 
-    private void sendNotes(String note, Session session, GameData game) throws IOException {
+    private void sendNotes(String note, Session session, Integer gameID) throws IOException {
+        System.out.println("Attempting to send message to players of game '" + gameID + "'");
+        System.out.println("notification: '" + note + "'");
         NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
                 note);
-        for (Session individual : this.manager.getAllInGame(game.gameID())) {
+        for (Session individual : this.manager.getAllInGame(gameID)) {
             if (individual != session) {
+                System.out.println("\tSending a Notification to Session '" + individual.toString() + "'.");
                 individual.getRemote().sendString(gson.toJson(notification));
+            }
+        }
+    }
+
+    private void sendLoads(String note, Session session, Integer gameID) throws IOException {
+        System.out.println("Attempting to send a loadGame message to game '" + gameID + "'");
+        HashSet<Session> temp = this.manager.getAllInGame(gameID);
+        for (Session individual : temp) {
+            if (individual != session) {
+                System.out.println("\tSending a loadGame to Session '" + individual.toString() + "'.");
+                individual.getRemote().sendString(note);
             }
         }
     }
