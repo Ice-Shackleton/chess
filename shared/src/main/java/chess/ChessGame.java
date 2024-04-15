@@ -214,6 +214,12 @@ public class ChessGame {
             return false;
         }
 
+        //finally, we check if there are any valid moves the team can make.
+        if (teamStatus(teamColor)) {
+            return false;
+        }
+
+
         return true;
     }
 
@@ -225,14 +231,14 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        ChessPosition that;
+        ChessPosition king;
         switch (teamColor){
             case WHITE: {
-                that = this.whiteKing;
+                king = this.whiteKing;
                 break;
             }
             case BLACK: {
-                that = this.blackKing;
+                king = this.blackKing;
                 break;
             }
             case null: {
@@ -245,8 +251,13 @@ public class ChessGame {
         }
 
         //then, we check all the valid moves the king piece can make.
-        Collection<ChessMove> kingMoves = this.validMoves(that);
+        Collection<ChessMove> kingMoves = this.validMoves(king);
         if (!kingMoves.isEmpty()){
+            return false;
+        }
+
+        //finally, we check if there are any valid moves the team can make.
+        if (teamStatus(teamColor)) {
             return false;
         }
         return true;
@@ -434,5 +445,34 @@ public class ChessGame {
         return false;
     }
 
+    /**
+     * This function goes through each space on a {@link ChessBoard} and determines if any valid moves can be made by
+     * the teamColor passed in. If any valid moves can be made, it returns true; otherwise, it returns false.
+     * @param color
+     * @return
+     */
+    private boolean teamStatus(TeamColor color) {
+        ChessPosition current = null;
+        ChessPiece piece = null;
+        for (int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
+                current = new ChessPosition(i, j);
+                piece = this.boardState.getPiece(current);
+
+                if (piece != null) {
+                    if (piece.getTeamColor() == color) {
+                        Collection<ChessMove> check = validMoves(current);
+                        if (!check.isEmpty()) {
+                            return true;
+                        }
+                    }
+                }
+
+            }
+        }
+
+
+        return false;
+    }
 
 }

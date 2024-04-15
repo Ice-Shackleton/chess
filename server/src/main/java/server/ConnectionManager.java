@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
     public final ConcurrentHashMap<String, Session> connections = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Integer> openGames = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<String, Integer> openGames = new ConcurrentHashMap<>();
 
 
     public void add(String authToken, Integer gameID, Session session) {

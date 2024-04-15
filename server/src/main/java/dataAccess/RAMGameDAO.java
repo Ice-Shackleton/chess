@@ -120,7 +120,7 @@ public class RAMGameDAO implements GameDAO{
     }
 
     @Override
-    public ChessGame getSingleGame(int gameId) throws DataAccessException {
+    public GameData getSingleGame(int gameId) throws DataAccessException {
         return null;
     }
 

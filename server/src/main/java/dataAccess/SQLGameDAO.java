@@ -204,14 +204,22 @@ public class SQLGameDAO implements GameDAO {
     }
 
     @Override
-    public ChessGame getSingleGame(int gameID) throws DataAccessException {
+    public GameData getSingleGame(int gameID) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement("SELECT * FROM gameDAO WHERE gameID = ?")) {
                 preparedStatement.setString(1, Integer.toString(gameID));
                 ResultSet games = preparedStatement.executeQuery();
 
                 if (games.next()) {
-                    return new Gson().fromJson(games.getString("chessGame"), ChessGame.class);
+                    GameData response = new GameData(
+                            Integer.parseInt(games.getString("gameID")),
+                            games.getString("whiteUsername"),
+                            games.getString("blackUsername"),
+                            new Gson().fromJson(games.getString("chessGame"), ChessGame.class),
+                            games.getString("gameName")
+                    );
+
+                    return response;
                 }
                 return null;
             }

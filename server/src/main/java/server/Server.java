@@ -34,8 +34,8 @@ public class Server {
             userDAO = new RAMUserDAO();
         }
 
-        WSServer temp = new WSServer(userDAO, gameDAO, authDAO);
-        Spark.webSocket("/connect", temp);
+        WSServer socket = new WSServer(userDAO, gameDAO, authDAO);
+        Spark.webSocket("/connect", socket);
 
 
         ClearService clearService = new ClearService(userDAO, gameDAO, authDAO);
@@ -47,7 +47,7 @@ public class Server {
         JoinGameService joinGameService = new JoinGameService(authDAO, gameDAO);
 
         Spark.delete("/db", ((Request request, Response response) ->
-                new ClearHandler(clearService).clearServer(request,response)));
+                new ClearHandler(clearService).clearServer(request,response, socket)));
         Spark.post("/user", ((Request request, Response response) ->
                 new RegisterHandler(registerService).registerUser(request, response)));
         Spark.post("/session", ((Request request, Response response) ->

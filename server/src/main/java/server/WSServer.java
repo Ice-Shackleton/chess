@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Objects;
 
 @WebSocket
 public class WSServer {
@@ -36,7 +37,12 @@ public class WSServer {
         this.gameDAO = gameDAO;
         this.authDAO = authDAO;
         this.destroyedGames = new HashSet<>();
+    }
 
+    public void clearAll() {
+        this.manager.connections.clear();
+        this.manager.openGames.clear();
+        this.destroyedGames.clear();
     }
 
     @OnWebSocketMessage
@@ -59,14 +65,10 @@ public class WSServer {
                     throw new Exception("invalid authToken provided.");
                 }
                 //now, verifying details about the game.
-                ArrayList<GameData> temp = gameDAO.getGameList();
-                int i = 0;
-                while (i < temp.size()) {
-                    if (temp.get(i).gameID() == request.gameID) {
-                        game = temp.get(i);
-                        break;
-                    }
-                    i++;
+                try {
+                    game = this.gameDAO.getSingleGame(request.gameID);
+                } catch (Exception e) {
+                    throw new Exception("provided game does not exist.");
                 }
                 //verifying data is correct.
                 if (game == null) {
@@ -96,8 +98,8 @@ public class WSServer {
                     }
                 }
 
-                System.out.println("user attempting to join is this: " + request.getAuthString());
-                System.out.println("attempting to join game '" + game.gameName() + "'");
+                //System.out.println("user attempting to join is this: " + request.getAuthString());
+                //System.out.println("attempting to join game '" + game.gameName() + "'");
 
                 LoadGameMessage response = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game.game());
                 session.getRemote().sendString(gson.toJson(response));
@@ -110,7 +112,7 @@ public class WSServer {
                 //this does much the same work as joinPlayer, but with much less verification.
                 //First, verifying the authToken.
                 JoinObserverMessage request = gson.fromJson(message, JoinObserverMessage.class);
-                GameData game = null;
+                GameData game = this.gameDAO.getSingleGame(request.gameID);
                 AuthData token = null;
                 try {
                     token = this.authDAO.getAuth(request.getAuthString());
@@ -119,16 +121,6 @@ public class WSServer {
                     }
                 } catch (Exception e) {
                     throw new Exception("invalid authToken provided.");
-                }
-                //now, verifying details about the game.
-                ArrayList<GameData> temp = gameDAO.getGameList();
-                int i = 0;
-                while (i < temp.size()) {
-                    if (temp.get(i).gameID() == request.gameID) {
-                        game = temp.get(i);
-                        break;
-                    }
-                    i++;
                 }
                 //verifying data is correct.
                 if (game == null) {
@@ -147,16 +139,34 @@ public class WSServer {
                     throw new Exception("attempted to make a move on a game where no more moves can be made, " +
                             "due to resignation or stalemate.");
                 }
+
+                //make sure user matches team of move
                 ChessMove move = request.move;
-                ChessGame game = this.gameDAO.getSingleGame(request.gameID);
+                GameData data = this.gameDAO.getSingleGame(request.gameID);
+                ChessGame game = data.game();
+                AuthData activeUser = this.authDAO.getAuth(request.getAuthString());
+                ChessPiece activePiece = game.getBoard().getPiece(move.getStartPosition());
+                if (game.getTeamTurn() != activePiece.getTeamColor()) {
+                    throw new Exception("attempted to move a piece out of turn order.");
+                }
+                if(game.getTeamTurn() == ChessGame.TeamColor.WHITE) {
+                    if (!data.whiteUsername().equals(activeUser.username())) {
+                        throw new Exception("a user who is not the active team is attempting to make a move."); 
+                    }
+                } else {
+                    if (!data.blackUsername().equals(activeUser.username())) {
+                        throw new Exception("a user who is not the active team is attempting to make a move.");
+                    }
+                }
 
                 try {
                     game.makeMove(move);
                 } catch (InvalidMoveException e) {
-                    throw new Exception(e.getMessage());
+                    throw new Exception("invalid move.");
                 }
                 this.gameDAO.updateSingleGame(request.gameID, game);
                 LoadGameMessage response = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
+                session.getRemote().sendString(gson.toJson(response));
                 sendLoads(gson.toJson(response), session, request.gameID);
                 String note = "A player has moved " + assignChessNotation(move.getStartPosition())
                         + " to " + assignChessNotation(move.getEndPosition()) + ".";
@@ -165,11 +175,13 @@ public class WSServer {
                 } else if (game.isInCheckmate(game.getTeamTurn())) {
                     note += "\nteam " + game.getTeamTurn()
                             + " is in checkmate! no more moves can be made in game " + game.getGameName() + ".";
+                    System.out.println(note);
                     this.manager.destroyGame(request.getAuthString());
                     this.destroyedGames.add(request.gameID);
-                } else if (game.isInStalemate(game.getTeamTurn())) {
+                }  else if (game.isInStalemate(game.getTeamTurn())) {
                     note += "\nteam " + game.getTeamTurn()
                             + " is in stalemate! no more moves can be made in game " + game.getGameName() + ".";
+                    System.out.println(note);
                     this.manager.destroyGame(request.getAuthString());
                     this.destroyedGames.add(request.gameID);
                 }
@@ -190,27 +202,38 @@ public class WSServer {
                     i++;
                 }
                 String note = "A user has left game '" + game.gameName() + "'.";
+                NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                        note);
+                session.getRemote().sendString(gson.toJson(notification));
+
                 sendNotes(note, session, game.gameID());
                 this.manager.remove(request.getAuthString());
+
             } else if (msg.getCommandType() == UserGameCommand.CommandType.RESIGN) {
                 ResignMessage request = gson.fromJson(message, ResignMessage.class);
-                GameData game = null;
-                ArrayList<GameData> temp = gameDAO.getGameList();
-                int i = 0;
-                while (i < temp.size()) {
-                    if (temp.get(i).gameID() == request.gameID) {
-                        game = temp.get(i);
-                        break;
-                    }
-                    i++;
-                }
+                GameData game = this.gameDAO.getSingleGame(request.gameID);
+                AuthData activeUser = this.authDAO.getAuth(request.getAuthString());
                 if (game == null) {
                     throw new Exception("attempted to resign from a game that does not exist");
+                }
+
+                if(this.destroyedGames.contains(request.gameID)) {
+                    throw new Exception("cannot resign from a game where one or more players have already resigned.");
+                }
+
+                if ( (!activeUser.username().equals(game.whiteUsername()))) {
+                    if (!activeUser.username().equals(game.blackUsername())) {
+                        throw new Exception("cannot attempt to resign when not one of the players.");
+                    }
                 }
                 this.manager.destroyGame(request.getAuthString());
                 this.destroyedGames.add(game.gameID());
                 String note = "a user has resigned from game '" + game.gameName() + "'.";
+                NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                        note);
+                session.getRemote().sendString(gson.toJson(notification));
                 sendNotes(note, session, game.gameID());
+
             } else {
                 throw new Exception("provided an invalid game.");
             }
@@ -223,24 +246,24 @@ public class WSServer {
     }
 
     private void sendNotes(String note, Session session, Integer gameID) throws IOException {
-        System.out.println("Attempting to send message to players of game '" + gameID + "'");
-        System.out.println("notification: '" + note + "'");
+        //System.out.println("Attempting to send message to players of game '" + gameID + "'");
+        //System.out.println("notification: '" + note + "'");
         NotificationMessage notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
                 note);
         for (Session individual : this.manager.getAllInGame(gameID)) {
             if (individual != session) {
-                System.out.println("\tSending a Notification to Session '" + individual.toString() + "'.");
+                //System.out.println("\tSending a Notification to Session '" + individual.toString() + "'.");
                 individual.getRemote().sendString(gson.toJson(notification));
             }
         }
     }
 
     private void sendLoads(String note, Session session, Integer gameID) throws IOException {
-        System.out.println("Attempting to send a loadGame message to game '" + gameID + "'");
+        //System.out.println("Attempting to send a loadGame message to game '" + gameID + "'");
         HashSet<Session> temp = this.manager.getAllInGame(gameID);
         for (Session individual : temp) {
             if (individual != session) {
-                System.out.println("\tSending a loadGame to Session '" + individual.toString() + "'.");
+                //System.out.println("\tSending a loadGame to Session '" + individual.toString() + "'.");
                 individual.getRemote().sendString(note);
             }
         }
