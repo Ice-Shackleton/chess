@@ -1,7 +1,6 @@
 package webSocketMessages.userCommands;
 
 import chess.ChessGame;
-import org.eclipse.jetty.server.Authentication;
 
 public class JoinPlayerMessage extends UserGameCommand {
 
