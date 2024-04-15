@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
-public class chessClientInterface {
+public class ChessClientInterface {
 
     private final ServerMain serverFacade;
     private final SocketFacade socketFacade;
@@ -24,7 +24,7 @@ public class chessClientInterface {
     private HashMap<Integer, GameData> currentGameList = null;
     private Gson gson = new Gson();
 
-    public chessClientInterface(String url) throws Exception {
+    public ChessClientInterface(String url) throws Exception {
             this.serverFacade = new ServerMain(url);
             this.socketFacade  = new SocketFacade(url);
             this.loginStatus = false;

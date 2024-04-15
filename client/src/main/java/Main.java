@@ -27,7 +27,7 @@ public class Main {
 
 
         try {
-            chessClientInterface newClient = new chessClientInterface("localhost:" + 8080);
+            ChessClientInterface newClient = new ChessClientInterface("localhost:" + 8080);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
