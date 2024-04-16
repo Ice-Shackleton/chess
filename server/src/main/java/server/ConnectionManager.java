@@ -18,14 +18,6 @@ public class ConnectionManager {
         openGames.put(authToken, gameID);
     }
 
-    public Session getSession(String authToken) {
-        return connections.get(authToken);
-    }
-
-    public Integer getGameID(String authToken) {
-        return openGames.get(authToken);
-    }
-
     public void remove(String authToken) {
         connections.remove(authToken);
         openGames.remove(authToken);

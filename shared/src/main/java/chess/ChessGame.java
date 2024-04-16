@@ -361,10 +361,7 @@ public class ChessGame {
                         return true;
                     }
                 }
-
-
             }
-
         }
 
         //Then, we check the horizontals.
@@ -388,9 +385,7 @@ public class ChessGame {
 
         for (int i=0; i < 8; i++){
             ChessPosition end = new ChessPosition(row + bRows[i], col + bCol[i]);
-
-            if      (board.getPiece(end) != null && board.isEnemyPiece(king, end)
-                    && board.isInBounds(end)) {
+            if (board.getPiece(end) != null && board.isEnemyPiece(king, end) && board.isInBounds(end)) {
                 if (board.getPiece(end).getPieceType() == (ChessPiece.PieceType.KNIGHT)) {
                     return true;
                 }
@@ -411,7 +406,6 @@ public class ChessGame {
                 }
                 break;
             }
-
             case WHITE: {
                 for (int i=-1; i < 2; i+=2){
                     ChessPosition end = new ChessPosition(row+1, col+i);
@@ -424,24 +418,17 @@ public class ChessGame {
                 }
                 break;
             }
-
         }
-
         //Checking for kings in capture range.
         bRows = new int[]{0, 0, 1, 1, 1,-1,-1,-1};
         bCol =  new int[]{1,-1, 1,-1, 0, 1,-1, 0};
         for (int i=0; i < 8; i++){
             ChessPosition end = new ChessPosition(row + bRows[i], col + bCol[i]);
-
-            if      (board.getPiece(end) != null
-                    && board.isEnemyPiece(king, end)
-                    && board.isInBounds(end)
-                    && board.getPiece(end).getPieceType() == ChessPiece.PieceType.KING)
+            if(board.getPiece(end) != null && board.isEnemyPiece(king, end) && board.isInBounds(end) && board.getPiece(end).getPieceType() == ChessPiece.PieceType.KING)
             {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -470,8 +457,6 @@ public class ChessGame {
 
             }
         }
-
-
         return false;
     }
 

@@ -112,36 +112,4 @@ public class SQLUserDAO implements UserDAO{
             throw new DataAccessException(e.getMessage());
         }
     }
-
-    /**
-     * This function checks if the user's username, email, or password match with the required format of the input.
-     * This means no special symbols or parenthesis are allowed in the username and password,
-     * to prevent code injections.
-     * @param input
-     * @param type
-     * @return True if valid, false if not.
-     */
-    private boolean isValid (String input, String type){
-        Pattern pattern;
-        Matcher matcher;
-        if (type.equals("username") || type.equals("password")){
-            pattern = Pattern.compile(USERNAME_PATTERN);
-            matcher = pattern.matcher(input);
-            System.out.println("username/password: " + (matcher.matches()));
-            return matcher.matches();
-        } else if (type.equals("email")) {
-            pattern = Pattern.compile(EMAIL_PATTERN);
-            matcher = pattern.matcher(input);
-            System.out.println("email: " + (matcher.matches()));
-            return matcher.matches();
-        }
-        return false;
-    }
-
-    private String sanitize (String input) {
-        // Remove any unwanted characters
-        input = input.replaceAll("[^a-zA-Z0-9]", "");
-        return input;
-    }
-
 }

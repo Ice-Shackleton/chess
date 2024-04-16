@@ -57,7 +57,7 @@ public class Server {
         Spark.get("/game", ((Request request, Response response) ->
                 new ListGamesHandler(listGameService).listHandler(request,response)));
         Spark.post("/game", ((Request request, Response response) ->
-                new CreateGameHandler(createGameService).createHandler(request,response)));
+                new createGameHandler(createGameService).createHandler(request,response)));
         Spark.put("/game", ((Request request, Response response) ->
                 new JoinGameHandler(joinGameService).joinHandler(request,response)));
 

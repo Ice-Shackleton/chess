@@ -30,11 +30,6 @@ public class RAMGameDAO implements GameDAO{
         return new ArrayList<GameData>(this.gameData.values());
     }
 
-    @Override
-    public ArrayList<String> getObservers(int gameID) {
-        return this.observers.get(gameID);
-    }
-
     /**
      * a method for determining if a player slot is open. Will always return true if the color does not
      * exactly match 'WHITE' or 'BLACK'.

@@ -111,44 +111,6 @@ public class ChessBoard {
         return !(mover.getTeamColor() == blocker.getTeamColor());
     }
 
-    /**
-     * A simple method that return the string character of the input {@link ChessPiece}.
-     * White pieces will be capitalized, and black pieces will be lowercase.
-     * @param piece A {@link ChessPiece}.
-     * @return A string consisting of a single character.
-     */
-    private String pieceChar(ChessPiece piece){
-        String temp = "";
-        if (piece == null) {
-            return " ";
-        }
-        ChessPiece.PieceType check = piece.getPieceType();
-        switch (check) {
-            case KING:
-                temp = "k";
-                break;
-            case QUEEN:
-                temp = "q";
-                break;
-            case BISHOP:
-                temp = "b";
-                break;
-            case KNIGHT:
-                temp = "n";
-                break;
-            case ROOK:
-                temp = "r";
-                break;
-            case PAWN:
-                temp = "p";
-                break;
-        }
-        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-            return temp.toUpperCase();
-        }
-        return temp;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

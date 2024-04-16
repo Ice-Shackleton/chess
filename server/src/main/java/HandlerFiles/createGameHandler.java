@@ -7,11 +7,11 @@ import model.*;
 import spark.Request;
 import spark.Response;
 
-public class CreateGameHandler {
+public class createGameHandler {
 
     private CreateGameService createGameService;
 
-    public CreateGameHandler(CreateGameService createGameService) {
+    public createGameHandler(CreateGameService createGameService) {
         this.createGameService = createGameService;
     }
 

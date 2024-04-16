@@ -38,53 +38,37 @@ public class Pawn {
 
                 // This checks if the pawn can capture diagonally to the left.
                 end = new ChessPosition(start.getRow() - 1, start.getColumn() - 1);
-                if (board.getPiece(end) != null
-                        && board.isInBounds(end)
-                        && board.isEnemyPiece(start, end)) {
+                if (board.getPiece(end) != null  && board.isInBounds(end)  && board.isEnemyPiece(start, end)) {
                     // If the capture ends in a promotion.
                     if (end.getRow() == 1) {
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.QUEEN));
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.ROOK));
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.BISHOP));
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.KNIGHT));
+                        addPromotionPieces(pMoves, start, end);
                     } else {
                         pMoves.add(new ChessMove(start, end, null));
                     }
 
                 }
-
                 // This checks if the pawn can capture diagonally to the right.
                 end = new ChessPosition(start.getRow() - 1, start.getColumn() + 1);
-                if (board.getPiece(end) != null
-                        && board.isInBounds(end)
-                        && board.isEnemyPiece(start, end)) {
+                if (board.getPiece(end) != null && board.isInBounds(end) && board.isEnemyPiece(start, end)) {
                     // If the capture ends in a promotion.
                     if (end.getRow() == 1) {
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.QUEEN));
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.ROOK));
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.BISHOP));
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.KNIGHT));
+                        addPromotionPieces(pMoves, start, end);
                     } else {
                         pMoves.add(new ChessMove(start, end, null));
                     }
 
                 }
-
                 //This checks if the pawn can simply move forward one space.
                 end = new ChessPosition(start.getRow() - 1, start.getColumn());
                 if (board.getPiece(end) == null && board.isInBounds(end)) {
                     //if the move ends in a promotion.
                     if (end.getRow() == 1) {
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.QUEEN));
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.ROOK));
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.BISHOP));
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.KNIGHT));
+                        addPromotionPieces(pMoves, start, end);
                     } else {
                         pMoves.add(new ChessMove(start, end, null));
                     }
                 }
                 break;
-
             }
             case WHITE: {
                 // This is checking if a pawn can perform its special move.
@@ -92,30 +76,22 @@ public class Pawn {
                     end = new ChessPosition(start.getRow() + 2, start.getColumn());
                     ChessPosition mid = new ChessPosition(start.getRow()+1, start.getColumn());
 
-                    if (board.getPiece(end) == null
-                            && board.getPiece(mid) == null
-                            && board.isInBounds(end)) {
+                    if (board.getPiece(end) == null && board.getPiece(mid) == null && board.isInBounds(end)) {
                         pMoves.add(new ChessMove(start, end, null));
                     }
                 }
 
                 // This checks if the pawn can capture diagonally to the left.
                 end = new ChessPosition(start.getRow() + 1, start.getColumn() - 1);
-                if (board.getPiece(end) != null
-                        && board.isInBounds(end)
-                        && board.isEnemyPiece(start, end)) {
+                if (board.getPiece(end) != null && board.isInBounds(end) && board.isEnemyPiece(start, end)) {
                     // If the capture ends in a promotion.
                     if (end.getRow() == 8) {
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.QUEEN));
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.ROOK));
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.BISHOP));
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.KNIGHT));
+                        addPromotionPieces(pMoves, start, end);
                     } else {
                         pMoves.add(new ChessMove(start, end, null));
                     }
 
                 }
-
                 // This checks if the pawn can capture diagonally to the right.
                 end = new ChessPosition(start.getRow() + 1, start.getColumn() + 1);
                 if (board.getPiece(end) != null
@@ -123,33 +99,32 @@ public class Pawn {
                         && board.isEnemyPiece(start, end)) {
                     // If the capture ends in a promotion.
                     if (end.getRow() == 8) {
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.QUEEN));
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.ROOK));
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.BISHOP));
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.KNIGHT));
+                        addPromotionPieces(pMoves, start, end);
                     } else {
                         pMoves.add(new ChessMove(start, end, null));
                     }
 
                 }
-
                 //This checks if the pawn can simply move forward one space.
                 end = new ChessPosition(start.getRow() + 1, start.getColumn());
                 if (board.getPiece(end) == null && board.isInBounds(end)) {
                     //if the move ends in a promotion.
                     if (end.getRow() == 8) {
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.QUEEN));
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.ROOK));
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.BISHOP));
-                        pMoves.add(new ChessMove(start, end, ChessPiece.PieceType.KNIGHT));
+                        addPromotionPieces(pMoves, start, end);
                     } else {
                         pMoves.add(new ChessMove(start, end, null));
                     }
                 }
                 break;
-
             }
         }
         return pMoves;
+    }
+
+    private static void addPromotionPieces(HashSet<ChessMove> pawn, ChessPosition start, ChessPosition end) {
+        pawn.add(new ChessMove(start, end, ChessPiece.PieceType.QUEEN));
+        pawn.add(new ChessMove(start, end, ChessPiece.PieceType.ROOK));
+        pawn.add(new ChessMove(start, end, ChessPiece.PieceType.BISHOP));
+        pawn.add(new ChessMove(start, end, ChessPiece.PieceType.KNIGHT));
     }
 }

@@ -1,7 +1,6 @@
 package chess;
 
-import chess.potentialMoves.allTheMoves;
-
+import chess.potentialMoves.AllTheMoves;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -62,7 +61,7 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return allTheMoves.moveCalculator(board, myPosition);
+        return AllTheMoves.moveCalculator(board, myPosition);
     }
 
     @Override

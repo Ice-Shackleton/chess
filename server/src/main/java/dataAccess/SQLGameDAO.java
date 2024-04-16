@@ -73,23 +73,6 @@ public class SQLGameDAO implements GameDAO {
     }
 
     @Override
-    public ArrayList<String> getObservers(int gameID) throws dataAccess.DataAccessException {
-        ArrayList<String> thisList = new ArrayList<String>();
-        try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("SELECT * FROM gameDAO WHERE gameID = ?")) {
-                preparedStatement.setString(1, Integer.toString(gameID));
-                ResultSet observers = preparedStatement.executeQuery();
-                if (observers.next()) {
-                    thisList = new Gson().fromJson(observers.getString("observers"), ArrayList.class);
-                }
-                return thisList;
-            }
-        } catch (SQLException | dataAccess.DataAccessException e) {
-            throw new dataAccess.DataAccessException(e.getMessage());
-        }
-    }
-
-    @Override
     public boolean colorOccupied(String color, int gameID) throws dataAccess.DataAccessException, BadAccessException {
         if(color == null){
             return false;
@@ -155,14 +138,6 @@ public class SQLGameDAO implements GameDAO {
                     //First, we need to handle the color.
                     java.sql.PreparedStatement newStatement;
                     if (color == null){
-                        /*
-                        ArrayList<String> observers = new Gson().fromJson(games.getString("observers"), ArrayList.class);
-                        observers.add(username);
-                        newStatement = conn.prepareStatement("UPDATE gameDAO SET observers = ? WHERE gameID = ?");
-                        newStatement.setString(1, new Gson().toJson(observers, ArrayList.class));
-                        newStatement.setString(2, Integer.toString(gameID));
-                        newStatement.executeUpdate();
-                        */
                         return true;
 
                     } else {

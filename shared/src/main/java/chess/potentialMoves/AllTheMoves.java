@@ -10,7 +10,7 @@ import java.util.HashSet;
  * This is called by ChessPiece.PieceMoves. It calculates all the possible moves a piece can make
  * from its current position.
  */
-public class allTheMoves {
+public class AllTheMoves {
 
     public static Collection<ChessMove> moveCalculator(ChessBoard board, ChessPosition start) {
         if(!board.isInBounds(start)){
