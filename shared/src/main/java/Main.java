@@ -10,6 +10,6 @@ public class Main {
         var newBoard = new ChessBoard();
         newBoard.resetBoard();
         System.out.println(newBoard.toString());
-        System.out.println("\n" + newBoard.oppositePerspective());
+        System.out.println("\n" + newBoard.toString());
     }
 }
