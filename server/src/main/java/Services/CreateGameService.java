@@ -16,7 +16,7 @@ public class CreateGameService {
         this.authDAO = authInput;
     }
 
-    public int CreateGame(String authToken, String gameName) throws dataAccess.DataAccessException, BadAccessException {
+    public int createGame(String authToken, String gameName) throws dataAccess.DataAccessException, BadAccessException {
         AuthData token;
         try {
             token = this.authDAO.getAuth(authToken);

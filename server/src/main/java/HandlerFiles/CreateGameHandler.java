@@ -7,11 +7,11 @@ import model.*;
 import spark.Request;
 import spark.Response;
 
-public class createGameHandler {
+public class CreateGameHandler {
 
     private CreateGameService createGameService;
 
-    public createGameHandler(CreateGameService createGameService) {
+    public CreateGameHandler(CreateGameService createGameService) {
         this.createGameService = createGameService;
     }
 
@@ -20,7 +20,7 @@ public class createGameHandler {
         GameName gameName = new Gson().fromJson(r.body(), GameName.class);
         int gameID = -1;
         try{
-            gameID = this.createGameService.CreateGame(authToken, gameName.gameName());
+            gameID = this.createGameService.createGame(authToken, gameName.gameName());
         } catch (dataAccess.DataAccessException wrongToken){
             q.status(401);
             return new Gson().toJson(new Message("Error: unauthorized"));

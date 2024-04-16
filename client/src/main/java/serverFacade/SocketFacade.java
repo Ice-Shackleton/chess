@@ -8,7 +8,7 @@ import webSocketMessages.serverMessages.ServerMessage;
 
 import javax.websocket.*;
 import java.net.URI;
-import static ui.EscapeSequences.*;
+import static chess.EscapeSequences.*;
 
 public class SocketFacade extends Endpoint {
 
@@ -47,7 +47,7 @@ public class SocketFacade extends Endpoint {
             if (response.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
                 LoadGameMessage effect = gson.fromJson(message, LoadGameMessage.class);
                 System.out.println(SET_TEXT_COLOR_GREEN + "black is green; white is magenta.");
-                System.out.println("\n" + effect.game.getBoard().oppositePerspective());
+                System.out.println("\n" + effect.game.getBoard().toString());
                 System.out.print(SET_TEXT_COLOR_LIGHT_GREY + "[GAME] >>> ");
             } else if (response.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
                 NotificationMessage note = gson.fromJson(message, NotificationMessage.class);

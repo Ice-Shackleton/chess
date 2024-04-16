@@ -134,8 +134,14 @@ public class ChessBoard {
        return temp;
     }
 
-
-    public String oppositePerspective() {
+    /**
+     * This overrides the usual toString method to print out the chess board. It prints with the White side
+     * on the top, and the Black pieces on the bottom.
+     * Ideally, it can be used to print out any board state.
+     * @return A stringbuilder.toString that will represent the current board state.
+     */
+    @Override
+    public String toString() {
         StringBuilder state = new StringBuilder(400);
         boolean isWhite = true;
         state.append(SET_TEXT_COLOR_WHITE + " A   B   C  D  E   F   G   H\n");
@@ -157,10 +163,10 @@ public class ChessBoard {
                     state.append(" ");
                     if (input.getTeamColor() == ChessGame.TeamColor.WHITE) {
                         state.append(SET_TEXT_COLOR_MAGENTA);
-                        state.append(input.toString());
+                        state.append(input);
                     } else {
                         state.append(SET_TEXT_COLOR_GREEN);
-                        state.append(input.toString());
+                        state.append(input);
                     }
                     state.append(" ");
                 } else {
@@ -174,52 +180,6 @@ public class ChessBoard {
             state.append("  ");
             state.append(i+1);
 
-        }
-        return state.toString();
-    }
-
-    /**
-     * This overrides the usual toString method to print out the chess board. It prints with the White side
-     * on the top, and the Black pieces on the bottom.
-     * Ideally, it can be used to print out any board state.
-     * @return A stringbuilder.toString that will represent the current board state.
-     */
-    @Override
-    public String toString() {
-        StringBuilder state = new StringBuilder(400);
-        boolean isWhite = true;
-        state.append(SET_TEXT_COLOR_WHITE + " A   B   C  D  E   F   G   H\n");
-        for (int i = 0; i < 8; i++) {
-            if (i != 0){ state.append("\n"); }
-            for (int j = 0; j < 8; j++) {
-
-                if ((i + j) % 2 == 0){
-                    isWhite = false;
-                    state.append(SET_BG_COLOR_WHITE);
-                } else {
-                    isWhite = true;
-                    state.append(SET_BG_COLOR_DARK_GREY);
-                }
-
-                ChessPiece input = this.board[i][j];
-                if (input != null) {
-                    state.append(" ");
-                    if (input.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                        state.append(SET_TEXT_COLOR_MAGENTA);
-                        state.append(input.toString());
-                    } else {
-                        state.append(SET_TEXT_COLOR_GREEN);
-                        state.append(input.toString());
-                    }
-                    state.append(" ");
-                } else {
-                    state.append(EMPTY);
-                }
-            }
-            state.append(SET_TEXT_COLOR_WHITE);
-            state.append(RESET_BG_COLOR);
-            state.append("  ");
-            state.append(8-i);
         }
         return state.toString();
     }

@@ -20,12 +20,10 @@ public class Pawn {
      */
     public static Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition start) {
         HashSet<ChessMove> pMoves = new HashSet<ChessMove>();
-
         ChessPiece pawn = board.getPiece(start);
         ChessPosition end;
         switch (pawn.getTeamColor()) {
             case BLACK: {
-                // This is checking if a pawn can perform its special move.
                 if (start.getRow() == 7) {
                     end = new ChessPosition(start.getRow() - 2, start.getColumn());
                     ChessPosition mid = new ChessPosition(start.getRow()-1, start.getColumn());
@@ -35,7 +33,6 @@ public class Pawn {
                         pMoves.add(new ChessMove(start, end, null));
                     }
                 }
-
                 // This checks if the pawn can capture diagonally to the left.
                 end = new ChessPosition(start.getRow() - 1, start.getColumn() - 1);
                 if (board.getPiece(end) != null  && board.isInBounds(end)  && board.isEnemyPiece(start, end)) {
@@ -71,7 +68,6 @@ public class Pawn {
                 break;
             }
             case WHITE: {
-                // This is checking if a pawn can perform its special move.
                 if (start.getRow() == 2) {
                     end = new ChessPosition(start.getRow() + 2, start.getColumn());
                     ChessPosition mid = new ChessPosition(start.getRow()+1, start.getColumn());
@@ -80,8 +76,6 @@ public class Pawn {
                         pMoves.add(new ChessMove(start, end, null));
                     }
                 }
-
-                // This checks if the pawn can capture diagonally to the left.
                 end = new ChessPosition(start.getRow() + 1, start.getColumn() - 1);
                 if (board.getPiece(end) != null && board.isInBounds(end) && board.isEnemyPiece(start, end)) {
                     // If the capture ends in a promotion.
@@ -92,12 +86,10 @@ public class Pawn {
                     }
 
                 }
-                // This checks if the pawn can capture diagonally to the right.
                 end = new ChessPosition(start.getRow() + 1, start.getColumn() + 1);
                 if (board.getPiece(end) != null
                         && board.isInBounds(end)
                         && board.isEnemyPiece(start, end)) {
-                    // If the capture ends in a promotion.
                     if (end.getRow() == 8) {
                         addPromotionPieces(pMoves, start, end);
                     } else {
@@ -105,10 +97,8 @@ public class Pawn {
                     }
 
                 }
-                //This checks if the pawn can simply move forward one space.
                 end = new ChessPosition(start.getRow() + 1, start.getColumn());
                 if (board.getPiece(end) == null && board.isInBounds(end)) {
-                    //if the move ends in a promotion.
                     if (end.getRow() == 8) {
                         addPromotionPieces(pMoves, start, end);
                     } else {
